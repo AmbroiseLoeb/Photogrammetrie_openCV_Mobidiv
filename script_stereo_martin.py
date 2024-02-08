@@ -1,19 +1,23 @@
         # importation des bibliotheques
 import numpy as np
 import cv2 as cv
+import matplotlib
+matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 
+
+
         # chargement des parametres stereo
-# stereo_path = r"C:\Users\loeb\PycharmProjects\stereo_imagerie\calibration"
-stereo_path = r"C:\Users\loeb\PycharmProjects\stereo_imagerie\calibration"
-Q = np.load(stereo_path + rf"\Q.npy") # Q.npy absent
-FL = np.load(stereo_path + r"\P1.npy")[0][0]
-T = np.load(stereo_path + r"\T.npy")
+# stereo_path = "/home/loeb/PycharmProjects/stereo_imagerie/calibration"
+stereo_path = "/home/loeb/PycharmProjects/stereo_imagerie/calibration"
+#     Q = np.load(stereo_path + f"/Q.npy") # Q.npy absent
+FL = np.load(stereo_path + "/P1.npy")[0][0]
+T = np.load(stereo_path + "/T.npy")
 B = np.linalg.norm(T)
-mapx11 = np.load(stereo_path + r"\mapx11.npy")
-mapx12 = np.load(stereo_path + r"\mapx12.npy")
-mapx21 = np.load(stereo_path + r"\mapx21.npy")
-mapx22 = np.load(stereo_path + r"\mapx22.npy")
+mapx11 = np.load(stereo_path + "/mapx11.npy")
+mapx12 = np.load(stereo_path + "/mapx12.npy")
+mapx21 = np.load(stereo_path + "/mapx21.npy")
+mapx22 = np.load(stereo_path + "/mapx22.npy")
 
         # definition des parametres de disparite
 Dmax = 100 * 1000
@@ -28,8 +32,8 @@ else:
             min_disp = MinDisp
 
         # chargement des images gauche et droite
-# left_path = r"C:\Users\loeb\PycharmProjects\stereo_imagerie\uplot_100_1\uplot_100_camera_1_1_RGB.jpg"
-left_path=r"C:\Users\loeb\PycharmProjects\stereo_imagerie\uplot_100_1\uplot_100_camera_1_1_RGB.jpg"
+# left_path = "/home/loeb/PycharmProjects/stereo_imagerie/uplot_100_1/uplot_100_camera_1_1_RGB.jpg"
+left_path = "/home/loeb/PycharmProjects/stereo_imagerie/uplot_100_1/uplot_100_camera_1_1_RGB.jpg"
 id_image = left_path.split('camera_1')
 right_path = 'camera_2'.join(id_image)
 
@@ -41,10 +45,26 @@ img_r = cv.rotate(img_r, cv.ROTATE_90_CLOCKWISE)
 rgb_l = cv.cvtColor(cv.imread(left_path, cv.IMREAD_UNCHANGED), cv.COLOR_BGR2RGB)
 rgb_l = cv.rotate(rgb_l, cv.ROTATE_90_CLOCKWISE)
 
+        # affichage images converties en niveaux de gris (pour test)
+
+plt.imshow(img_l)
+plt.imshow(img_r)
+plt.imshow(rgb_l)
+
+
         # rectification des images (transformation de perspective)
 imglCalRect = cv.remap(img_l, mapx11, mapx12, cv.INTER_LINEAR, borderValue=np.nan)
 imgrCalRect = cv.remap(img_r, mapx21, mapx22, cv.INTER_LINEAR, borderValue=np.nan)
 rgblCalRect = cv.remap(rgb_l, mapx11, mapx12, cv.INTER_LINEAR, borderValue=np.nan)
+
+        # affichage images transformées (pour test)
+
+plt.imshow(imglCalRect)
+plt.imshow(imgrCalRect)
+plt.imshow(rgblCalRect)
+
+
+
 
         # reduction taille des images
 h_ori, w_ori = imglCalRect.shape
