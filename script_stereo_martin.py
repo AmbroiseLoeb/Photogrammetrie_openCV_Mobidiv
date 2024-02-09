@@ -65,7 +65,6 @@ plt.imshow(rgblCalRect)
 
 
 
-
         # reduction taille des images
 h_ori, w_ori = imglCalRect.shape
 isubsampling = 2
