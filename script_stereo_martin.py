@@ -51,6 +51,7 @@ plt.imshow(img_l)
 plt.imshow(img_r)
 plt.imshow(rgb_l)
 
+
         # rectification des images (transformation de perspective)
 imglCalRect = cv.remap(img_l, mapx11, mapx12, cv.INTER_LINEAR, borderMode=cv.BORDER_TRANSPARENT)
 imgrCalRect = cv.remap(img_r, mapx21, mapx22, cv.INTER_LINEAR, borderMode=cv.BORDER_TRANSPARENT)
