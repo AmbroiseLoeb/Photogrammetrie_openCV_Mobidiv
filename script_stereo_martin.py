@@ -2,7 +2,7 @@
 import numpy as np
 import cv2 as cv
 import matplotlib
-matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')         #pour afficher les plt en popup
 from matplotlib import pyplot as plt
 
 
@@ -39,11 +39,11 @@ right_path = 'camera_2'.join(id_image)
 
         # rotation et conversion en niveaux de gris
 img_l = cv.imread(left_path, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
-img_l = cv.rotate(img_l, cv.ROTATE_90_CLOCKWISE)
+"""img_l = cv.rotate(img_l, cv.ROTATE_90_CLOCKWISE)"""
 img_r = cv.imread(right_path, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
-img_r = cv.rotate(img_r, cv.ROTATE_90_CLOCKWISE)
+"""img_r = cv.rotate(img_r, cv.ROTATE_90_CLOCKWISE)"""
 rgb_l = cv.cvtColor(cv.imread(left_path, cv.IMREAD_UNCHANGED), cv.COLOR_BGR2RGB)
-rgb_l = cv.rotate(rgb_l, cv.ROTATE_90_CLOCKWISE)
+"""rgb_l = cv.rotate(rgb_l, cv.ROTATE_90_CLOCKWISE)"""
 
         # affichage images converties en niveaux de gris (pour test)
 
@@ -51,17 +51,19 @@ plt.imshow(img_l)
 plt.imshow(img_r)
 plt.imshow(rgb_l)
 
-
         # rectification des images (transformation de perspective)
-imglCalRect = cv.remap(img_l, mapx11, mapx12, cv.INTER_LINEAR, borderValue=np.nan)
-imgrCalRect = cv.remap(img_r, mapx21, mapx22, cv.INTER_LINEAR, borderValue=np.nan)
-rgblCalRect = cv.remap(rgb_l, mapx11, mapx12, cv.INTER_LINEAR, borderValue=np.nan)
+imglCalRect = cv.remap(img_l, mapx11, mapx12, cv.INTER_LINEAR, borderMode=cv.BORDER_TRANSPARENT)
+imgrCalRect = cv.remap(img_r, mapx21, mapx22, cv.INTER_LINEAR, borderMode=cv.BORDER_TRANSPARENT)
+rgblCalRect = cv.remap(rgb_l, mapx11, mapx12, cv.INTER_LINEAR, borderMode=cv.BORDER_TRANSPARENT)
 
         # affichage images transformées (pour test)
 
 plt.imshow(imglCalRect)
 plt.imshow(imgrCalRect)
 plt.imshow(rgblCalRect)
+
+plt.imshow(mapx12)
+plt.imshow(mapx11[:,:,0])
 
 
 
