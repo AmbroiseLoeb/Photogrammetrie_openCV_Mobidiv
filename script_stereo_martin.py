@@ -31,7 +31,7 @@ else:
 
 # chargement des images gauche et droite
 # left_path = "/home/loeb/PycharmProjects/stereo_imagerie/uplot_100_1/uplot_100_camera_1_1_RGB.jpg"
-left_path = "/home/loeb/PycharmProjects/stereo_imagerie/uplot_100_1/uplot_100_camera_1_1_RGB.jpg"
+left_path = "/home/loeb/Literal_mobidiv_2023/Session 2023-02-15 08-34-51/uplot_100_1/uplot_100_camera_1_1_RGB.jpg"
 id_image = left_path.split('camera_1')
 right_path = 'camera_2'.join(id_image)
 
@@ -91,15 +91,15 @@ disparity = stereo.compute(imglCalRect, imgrCalRect).astype(np.float32) / 16
 disparity = cv.resize(disparity * isubsampling, (w_ori, h_ori), interpolation=cv.INTER_AREA)
 
 # affichage des résultats (avec Matplotlib)
-"""plt.figure()
-plt.imshow(rgblCalRect)"""
+plt.figure()
+plt.imshow(rgblCalRect)
 plt.figure()
 plt.imshow(disparity, cmap='jet', vmin=np.nanquantile(disparity, 0.005), vmax=np.nanquantile(disparity, 0.995))
 
 # calcul et affichage de la carte de profondeur
 Z = abs(FL * B / disparity)
 plt.figure()
-plt.imshow(Z, cmap='jet', vmin=500, vmax=2000)
+plt.imshow(Z, cmap='jet', vmin=1000, vmax=1500)
 plt.colorbar()
 """plt.figure()
 plt.imshow(rgblCalRect)"""
@@ -111,7 +111,8 @@ x_image, y_image, z_image = cv.split(xyz_image)
 plt.figure()
 plt.imshow(z_image, cmap='jet', vmin=np.nanquantile(z_image, 0.01), vmax=np.nanquantile(z_image, 0.9))
 
-mask_distance = z_image > 3000
+mask_distance = z_image > 1400
 disparity[mask_distance] = np.nan
 plt.figure()
 plt.imshow(disparity, cmap='jet', vmin=np.nanquantile(disparity, 0.005), vmax=np.nanquantile(disparity, 0.995))
+plt.colorbar()
