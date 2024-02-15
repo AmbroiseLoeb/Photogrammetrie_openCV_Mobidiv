@@ -6,7 +6,6 @@ from matplotlib import pyplot as plt
 matplotlib.use('TkAgg')  # pour afficher les plt en popup
 
 # chargement des parametres stereo
-# stereo_path = "/home/loeb/PycharmProjects/stereo_imagerie/calibration"
 stereo_path = "/home/loeb/PycharmProjects/stereo_imagerie/calibration"
 Q = np.load(stereo_path + f"/Q.npy")
 FL = np.load(stereo_path + "/P1.npy")[0][0]
@@ -30,8 +29,7 @@ else:
     min_disp = MinDisp
 
 # chargement des images gauche et droite
-# left_path = "/home/loeb/PycharmProjects/stereo_imagerie/uplot_100_1/uplot_100_camera_1_1_RGB.jpg"
-left_path = "/home/loeb/Literal_mobidiv_2023/Session 2023-02-15 08-34-51/uplot_100_1/uplot_100_camera_1_1_RGB.jpg"
+left_path = "/home/loeb/Literal_mobidiv_2023/Session 2023-03-01 12-48-17/uplot_100_1/uplot_100_camera_1_1_RGB.jpg"
 id_image = left_path.split('camera_1')
 right_path = 'camera_2'.join(id_image)
 
@@ -40,27 +38,10 @@ img_l = cv.imread(left_path, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
 img_r = cv.imread(right_path, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
 rgb_l = cv.cvtColor(cv.imread(left_path, cv.IMREAD_UNCHANGED), cv.COLOR_BGR2RGB)
 
-# affichage images converties en niveaux de gris (pour test)
-"""
-plt.imshow(img_l)
-plt.imshow(img_r)
-plt.imshow(rgb_l)
-"""
-
 # rectification des images (transformation de perspective)
 imglCalRect = cv.remap(img_l, mapx11, mapx12, cv.INTER_LINEAR, borderMode=cv.BORDER_CONSTANT)
 imgrCalRect = cv.remap(img_r, mapx21, mapx22, cv.INTER_LINEAR, borderMode=cv.BORDER_CONSTANT)
 rgblCalRect = cv.remap(rgb_l, mapx11, mapx12, cv.INTER_LINEAR, borderMode=cv.BORDER_CONSTANT)
-
-# affichage images transformées (pour test)
-"""
-plt.imshow(imglCalRect)
-plt.imshow(imgrCalRect)
-plt.imshow(rgblCalRect)
-
-plt.imshow(mapx12)
-plt.imshow(mapx11[:,:,0])
-"""
 
 # reduction taille des images
 h_ori, w_ori = imglCalRect.shape
@@ -90,7 +71,7 @@ stereo = cv.StereoSGBM_create(minDisparity=round(min_disp / isubsampling),
 disparity = stereo.compute(imglCalRect, imgrCalRect).astype(np.float32) / 16
 disparity = cv.resize(disparity * isubsampling, (w_ori, h_ori), interpolation=cv.INTER_AREA)
 
-# affichage des résultats (avec Matplotlib)
+# affichage de la carte de disparite
 plt.figure()
 plt.imshow(rgblCalRect)
 plt.figure()
@@ -99,20 +80,16 @@ plt.imshow(disparity, cmap='jet', vmin=np.nanquantile(disparity, 0.005), vmax=np
 # calcul et affichage de la carte de profondeur
 Z = abs(FL * B / disparity)
 plt.figure()
-plt.imshow(Z, cmap='jet', vmin=1000, vmax=1500)
+plt.imshow(Z, cmap='jet', vmin=800, vmax=1500)
 plt.colorbar()
-"""plt.figure()
-plt.imshow(rgblCalRect)"""
 
-# affichage de la carte de disparite
-# Masking based on distance
+# calcul et affichage de la carte de profondeur 2
 xyz_image = cv.reprojectImageTo3D(disparity, Q)
 x_image, y_image, z_image = cv.split(xyz_image)
-plt.figure()
-plt.imshow(z_image, cmap='jet', vmin=np.nanquantile(z_image, 0.01), vmax=np.nanquantile(z_image, 0.9))
+mask_distance = z_image > 1400      # Masque en fonction de la distance
+"""mask_distance = mask_distance < 1000"""
+z_image[mask_distance] = np.nan
 
-mask_distance = z_image > 1400
-disparity[mask_distance] = np.nan
 plt.figure()
-plt.imshow(disparity, cmap='jet', vmin=np.nanquantile(disparity, 0.005), vmax=np.nanquantile(disparity, 0.995))
+plt.imshow(z_image, cmap='jet', vmin=800, vmax=1500)
 plt.colorbar()
