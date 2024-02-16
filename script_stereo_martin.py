@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 matplotlib.use('TkAgg')  # pour afficher les plt en popup
 
 # chargement des parametres stereo
-stereo_path = "/home/loeb/PycharmProjects/stereo_imagerie/calibration"
+stereo_path = "/home/loeb/PycharmProjects/Photogrammetrie_openCV_Mobidiv/calibration"
 Q = np.load(stereo_path + f"/Q.npy")
 FL = np.load(stereo_path + "/P1.npy")[0][0]
 T = np.load(stereo_path + "/T.npy")
