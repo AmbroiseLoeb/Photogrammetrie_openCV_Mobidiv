@@ -52,10 +52,9 @@ imgrCalRect = cv.resize(imgrCalRect, (round(w_ori / isubsampling), round(h_ori /
                         interpolation=cv.INTER_AREA)
 
 # configuration de StereoSGBM (Stereo Semi-Global Block Matching ?)
-blockSize = 5
 stereo = cv.StereoSGBM.create(minDisparity=round(min_disp / isubsampling),
                               numDisparities=round(numDisparities / isubsampling),
-                              blockSize=blockSize,
+                              blockSize=5,
                               uniquenessRatio=1,
                               # preFilterCap=50,
                               # disp12MaxDiff=10,
