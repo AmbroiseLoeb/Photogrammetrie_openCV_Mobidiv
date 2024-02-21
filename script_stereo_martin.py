@@ -29,7 +29,7 @@ else:
     min_disp = MinDisp
 
 # chargement des images gauche et droite
-left_path = "/home/loeb/Literal_mobidiv_2023/Session 2023-03-01 12-48-17/uplot_100_1/uplot_100_camera_1_1_RGB.jpg"
+left_path = "/home/loeb/Literal_mobidiv_2023/Session 2023-04-19 08-53-38/uplot_100_1/uplot_100_camera_1_2_RGB.jpg"
 id_image = left_path.split('camera_1')
 right_path = 'camera_2'.join(id_image)
 
@@ -53,18 +53,17 @@ imgrCalRect = cv.resize(imgrCalRect, (round(w_ori / isubsampling), round(h_ori /
 
 # configuration de StereoSGBM (Stereo Semi-Global Block Matching ?)
 blockSize = 5
-stereo = cv.StereoSGBM_create(minDisparity=round(min_disp / isubsampling),
+stereo = cv.StereoSGBM.create(minDisparity=round(min_disp / isubsampling),
                               numDisparities=round(numDisparities / isubsampling),
                               blockSize=blockSize,
                               uniquenessRatio=1,
                               # preFilterCap=50,
-                              # disp12MaxDiff=1,
                               # disp12MaxDiff=10,
                               P1=2 * blockSize ** 2,
                               P2=32 * blockSize ** 2,
                               mode=cv.StereoSGBM_MODE_HH4,
-                              # speckleWindowSize    = 100,
-                              # speckleRange         = 2,
+                              speckleWindowSize=0,
+                              # speckleRange=2,
                               )
 
 # calcul de la carte de disparite
@@ -87,8 +86,10 @@ plt.colorbar()
 xyz_image = cv.reprojectImageTo3D(disparity, Q)
 x_image, y_image, z_image = cv.split(xyz_image)
 mask_distance = z_image > 1400      # Masque en fonction de la distance
-"""mask_distance = mask_distance < 1000"""
 z_image[mask_distance] = np.nan
+mask_distance2 = z_image < 600
+z_image[mask_distance2] = np.nan
+
 
 plt.figure()
 plt.imshow(z_image, cmap='jet', vmin=800, vmax=1500)
