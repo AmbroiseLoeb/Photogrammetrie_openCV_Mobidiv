@@ -29,14 +29,33 @@ else:
     min_disp = MinDisp
 
 # chargement des images gauche et droite
-left_path = "/home/loeb/Literal_mobidiv_2023/Session 2023-04-19 08-53-38/uplot_100_1/uplot_100_camera_1_2_RGB.jpg"
+left_path = "/home/loeb/Literal_mobidiv_2023/Session 2023-02-06 13-14-02/uplot_100_1/uplot_100_camera_1_2_RGB.jpg"
 id_image = left_path.split('camera_1')
 right_path = 'camera_2'.join(id_image)
 
-# rotation et conversion en niveaux de gris
-img_l = cv.imread(left_path, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
-img_r = cv.imread(right_path, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
-rgb_l = cv.cvtColor(cv.imread(left_path, cv.IMREAD_UNCHANGED), cv.COLOR_BGR2RGB)
+image_left = cv.imread(left_path)
+image_right = cv.imread(right_path)
+
+
+def raccourcir_image(photo):
+    hauteur, largeur = photo.shape[:2]
+    # Calculer les nouvelles dimensions
+    nouvelle_largeur = int(largeur * 0.75)
+    gauche = int((largeur - nouvelle_largeur) / 2)
+    droite = largeur - gauche
+    # Recadrer l'image
+    photo = photo[:, gauche:droite]
+
+    return photo
+
+
+# reconaissance des contours du bac
+
+
+# conversion en niveaux de gris
+img_l = cv.cvtColor(image_left, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
+img_r = cv.cvtColor(image_right, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
+rgb_l = cv.cvtColor(image_left, cv.COLOR_BGR2RGB)
 
 # rectification des images (transformation de perspective)
 imglCalRect = cv.remap(img_l, mapx11, mapx12, cv.INTER_LINEAR, borderMode=cv.BORDER_CONSTANT)
@@ -84,12 +103,17 @@ plt.colorbar()
 # calcul et affichage de la carte de profondeur 2
 xyz_image = cv.reprojectImageTo3D(disparity, Q)
 x_image, y_image, z_image = cv.split(xyz_image)
-mask_distance = z_image > 1400      # Masque en fonction de la distance
+mask_distance = z_image > 1400  # Masque en fonction de la distance
 z_image[mask_distance] = np.nan
 mask_distance2 = z_image < 600
 z_image[mask_distance2] = np.nan
 
 
+# racourcir image
+z_image = raccourcir_image(z_image)
+
 plt.figure()
 plt.imshow(z_image, cmap='jet', vmin=800, vmax=1500)
 plt.colorbar()
+
+
