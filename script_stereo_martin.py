@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 matplotlib.use('TkAgg')  # pour afficher les plt en popup
 
 # chargement des parametres stereo
-stereo_path = "/home/loeb/PycharmProjects/Photogrammetrie_openCV_Mobidiv/calibration"
+stereo_path = "/home/loeb/Documents/PycharmProjects/Photogrammetrie_openCV_Mobidiv/calibration"
 Q = np.load(stereo_path + f"/Q.npy")
 FL = np.load(stereo_path + "/P1.npy")[0][0]
 T = np.load(stereo_path + "/T.npy")
@@ -29,7 +29,8 @@ else:
     min_disp = MinDisp
 
 # chargement des images gauche et droite
-left_path = "/home/loeb/Literal_mobidiv_2023/Session 2023-02-06 13-14-02/uplot_100_1/uplot_100_camera_1_2_RGB.jpg"
+left_path = ("/home/loeb/Documents/Literal_mobidiv_2023/Session 2023-02-06 "
+             "13-14-02/uplot_100_1/uplot_100_camera_1_2_RGB.jpg")
 id_image = left_path.split('camera_1')
 right_path = 'camera_2'.join(id_image)
 
@@ -115,5 +116,3 @@ z_image = raccourcir_image(z_image)
 plt.figure()
 plt.imshow(z_image, cmap='jet', vmin=800, vmax=1500)
 plt.colorbar()
-
-
