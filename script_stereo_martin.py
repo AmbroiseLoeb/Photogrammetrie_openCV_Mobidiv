@@ -2,6 +2,7 @@
 import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
+import scipy.ndimage as ndi
 
 '''matplotlib.use('TkAgg')  # pour afficher les plt en popup'''
 
@@ -50,7 +51,7 @@ def raccourcir_image(photo):
     return photo
 
 
-# reconaissance du bac
+# reconaissance du bac #---------------
 
 # masque des pixels verts
 hsv_img = cv.cvtColor(image_left, cv.COLOR_BGR2HSV)
@@ -61,11 +62,23 @@ img_without_green = cv.bitwise_and(image_left, image_left, mask=~mask_green)  # 
 img_gray = cv.cvtColor(img_without_green, cv.COLOR_BGR2GRAY)  # Convertir en niveaux de gris
 
 # seuil de gris
-
 mean_intensity = np.mean(img_gray)
 _, thresholded_img = cv.threshold(img_gray, 1.5*mean_intensity, 255, cv.THRESH_BINARY)
 # thresholded_img = cv.adaptiveThreshold(img_gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 511, C = -mean_intensity)
 plt.figure() and plt.imshow(thresholded_img)
+
+
+# Étiqueter les objets
+labels, nb_labels = ndi.label(thresholded_img)
+# Calculer la taille de chaque objet
+sizes = ndi.sum(thresholded_img, labels, range(nb_labels + 1))
+# Supprimer les objets inférieurs à 50 pixels
+filtered_image = np.zeros_like(thresholded_img)
+for label in range(1, nb_labels + 1):
+    if sizes[label] >= 300 * 255 :
+        filtered_image[labels == label] = 255
+plt.figure() and plt.imshow(filtered_image)
+
 
 # Recherche des bords de bac
 mean_center = np.mean(thresholded_img[1200:2400, 1500:3000])
@@ -74,34 +87,26 @@ height, width = thresholded_img.shape
 centre_colonne = width // 2
 centre_ligne = height // 2
 
-for colonne in range(centre_colonne, width):
-    if np.mean(thresholded_img[1200:2600:, colonne]) > mean_tot:
+for colonne in range(centre_colonne + 100, width):
+    if np.sum(thresholded_img[1200:2400:, colonne]) > 30000 and np.mean(thresholded_img[1200:2400:, colonne]) > 1.5*mean_tot:
         break
 nouvelle_largeur_droite = colonne
 
-for colonne in range(centre_colonne, -1, -1):
-    if np.mean(thresholded_img[1200:2600:, colonne]) > mean_tot:
+for colonne in range(centre_colonne - 100, -1, -1):
+    if np.sum(thresholded_img[1200:2400:, colonne]) > 30000 and np.mean(thresholded_img[1200:2400:, colonne]) > 1.5*mean_tot:
         break
 nouvelle_largeur_gauche = colonne
 
-for ligne in range(centre_ligne, height):
-    if np.mean(thresholded_img[ligne, 1500:3000]) > mean_tot:
+for ligne in range(centre_ligne + 100, height):
+    if np.sum(thresholded_img[ligne, 1500:3000]) > 30000 and np.mean(thresholded_img[ligne, 1500:3000]) > 1.5*mean_tot:
         break
 nouvelle_hauteur_bas = ligne
 
-for ligne in range(centre_ligne, -1, -1):
-    if np.mean(thresholded_img[ligne, 1500:3000]) > mean_tot:
+for ligne in range(centre_ligne - 100, -1, -1):
+    if np.sum(thresholded_img[ligne, 1500:3000]) > 30000 and np.mean(thresholded_img[ligne, 1500:3000]) > 1.5*mean_tot:
         break
 nouvelle_hauteur_haut = ligne
 
-
-# Extraire la région du bac de l'image seuillée
-zeros_img = np.zeros_like(thresholded_img)
-image_l = cv.cvtColor(zeros_img, cv.COLOR_GRAY2BGR)
-image_r = cv.cvtColor(zeros_img, cv.COLOR_GRAY2BGR)
-image_l[nouvelle_hauteur_haut:nouvelle_hauteur_bas, nouvelle_largeur_gauche:nouvelle_largeur_droite] = image_left[nouvelle_hauteur_haut:nouvelle_hauteur_bas, nouvelle_largeur_gauche:nouvelle_largeur_droite]
-image_r[nouvelle_hauteur_haut:nouvelle_hauteur_bas, nouvelle_largeur_gauche:nouvelle_largeur_droite] = image_right[nouvelle_hauteur_haut:nouvelle_hauteur_bas, nouvelle_largeur_gauche:nouvelle_largeur_droite]
-plt.figure() and plt.imshow(image_l)
 
 
 
@@ -124,8 +129,8 @@ plt.figure() and plt.imshow(lines_img)
 
 # conversion en niveaux de gris
 # img_l = cv.cvtColor(image_left, cv.COLOR_BGR2GRAY)
-img_l = cv.cvtColor(image_l, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
-img_r = cv.cvtColor(image_r, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
+img_l = cv.cvtColor(image_left, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
+img_r = cv.cvtColor(image_right, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
 rgb_l = cv.cvtColor(image_left, cv.COLOR_BGR2RGB)
 
 # rectification des images (transformation de perspective)
@@ -174,13 +179,21 @@ plt.colorbar()
 # calcul et affichage de la carte de profondeur 2
 xyz_image = cv.reprojectImageTo3D(disparity, Q)
 x_image, y_image, z_image = cv.split(xyz_image)
-mask_distance = z_image > 1400  # Masque en fonction de la distance
-z_image[mask_distance] = np.nan
-mask_distance2 = z_image < 600
-z_image[mask_distance2] = np.nan
+#mask_distance = z_image > 1400  # Masque en fonction de la distance
+#z_image[mask_distance] = np.nan
+#mask_distance2 = z_image < 600
+#z_image[mask_distance2] = np.nan
+
+# Extraire la région du bac de l'image seuillée
+image_cut = np.zeros_like(thresholded_img, dtype = 'float32')
+#image_cut = cv.cvtColor(zeros_img, cv.COLOR_GRAY2BGR)
+image_cut[nouvelle_hauteur_haut:nouvelle_hauteur_bas, nouvelle_largeur_gauche:nouvelle_largeur_droite] = z_image[nouvelle_hauteur_haut:nouvelle_hauteur_bas, nouvelle_largeur_gauche:nouvelle_largeur_droite]
+plt.figure() and plt.imshow(image_cut, cmap='jet', vmin=800, vmax=1500)
+
+
 
 # racourcir image
-z_image = raccourcir_image(z_image)
+# z_image = raccourcir_image(z_image)
 
 plt.figure()
 plt.imshow(z_image, cmap='jet', vmin=800, vmax=1500)
