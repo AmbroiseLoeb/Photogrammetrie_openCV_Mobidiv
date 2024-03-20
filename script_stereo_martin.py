@@ -30,7 +30,7 @@ else:
     min_disp = MinDisp
 
 # chargement des images gauche et droite
-left_path = ("/home/loeb/Documents/Literal_mobidiv_2023/Session 2023-01-16 08-40-35"
+left_path = ("/home/loeb/Documents/Literal_mobidiv_2023/Session 2023-06-22 06-32-00"
              "/uplot_100_1/uplot_100_camera_1_2_RGB.jpg")
 id_image = left_path.split('camera_1')
 right_path = 'camera_2'.join(id_image)
@@ -39,19 +39,41 @@ image_left = cv.imread(left_path)
 image_right = cv.imread(right_path)
 
 
+def raccourcir_image(image):
+    hauteur, largeur = image.shape[:2]
+    # Calculer les nouvelles dimensions
+    nouvelle_largeur = int(largeur * 0.75)
+    g = int((largeur - nouvelle_largeur) / 2)
+    d = largeur - g
+    # Recadrer l'image
+    photo = image[:, g:d]
+
+    return photo
+
+
 def bord_bac(image):
+    """ definir les contour du bac sur la photo, detecter et supprimer le capteur si besoin """
+
+    # convertir en rgba (a = transparence)
+    img_sans_capteur = cv.cvtColor(image, cv.COLOR_RGB2RGBA)
+
+    # definir la colone et la ligne centrale
+    height, width, color = img_sans_capteur.shape
+    centre_colonne = width // 2
+    centre_ligne = height // 2
+
     # masque des pixels verts
-    hsv_img = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+    hsv_img = cv.cvtColor(img_sans_capteur, cv.COLOR_BGR2HSV)
     lower_green = np.array([10, 20, 20])  # Valeurs min de teinte, saturation et valeur pour la couleur verte
     upper_green = np.array([100, 255, 255])  # Valeurs max de teinte, saturation et valeur pour la couleur verte
     mask_green = cv.inRange(hsv_img, lower_green, upper_green)
-    img_without_green = cv.bitwise_and(image, image, mask=~mask_green)  # Appliquer le masque
+    img_without_green = cv.bitwise_and(img_sans_capteur, img_sans_capteur, mask=~mask_green)  # Appliquer le masque
     img_gray = cv.cvtColor(img_without_green, cv.COLOR_BGR2GRAY)  # Convertir en niveaux de gris
 
     # seuil de gris
     seuil_gris = max(np.mean(img_gray), 20)
     _, thresholded_img = cv.threshold(img_gray, seuil_gris, 255, cv.THRESH_BINARY)
-    plt.figure() and plt.imshow(thresholded_img)
+    # plt.figure() and plt.imshow(thresholded_img)
 
     # Étiqueter les objets, calculer leur coordonnées et leur taille
     labels, nb_labels = ndi.label(thresholded_img)
@@ -60,26 +82,28 @@ def bord_bac(image):
     # Supprimer les objets inférieurs à 300 pixels et le capteur
     filtered_image = np.zeros_like(thresholded_img)
     seuil2 = 0
+
     for label in range(1, nb_labels + 1):
         if 1200 <= coordinates[label][0] <= 2500 and 1500 <= coordinates[label][1] <= 3200:  # capteur
             if 20000 * 255 <= sizes[label] <= 60000 * 255:
-                image[labels == label] = [0, 0, 0]
-                seuil2 = 100000
+                img_sans_capteur[labels == label] = (0, 0, 0, 0)
+                seuil2 = 100000  # augmentation du seuil en cas de présence du capteur
         elif sizes[label] >= 300 * 255:
             filtered_image[labels == label] = 255
     # plt.figure() and plt.imshow(filtered_image)
 
-    # Recherche des bords de bac
+    # paramettres pour recherche des bords de bac
     largueur_min = 1600
     longueur_min = 1800
     nouvelle_longueur = 0
     nouvelle_largeur = 0
     seuil_bordure = 20000
+    nouvelle_largeur_haut = centre_ligne
+    nouvelle_largeur_bas = centre_ligne
+    nouvelle_longueur_gauche = centre_colonne
+    nouvelle_longueur_droite = centre_colonne
 
-    height, width, color = image.shape
-    centre_colonne = width // 2
-    centre_ligne = height // 2
-
+    # Recherche des bords de bac
     while nouvelle_longueur <= longueur_min or nouvelle_largeur <= largueur_min:
         if nouvelle_largeur <= largueur_min:
             colonne = centre_colonne
@@ -109,37 +133,46 @@ def bord_bac(image):
 
         filtered_image[nouvelle_largeur_haut:nouvelle_largeur_bas, nouvelle_longueur_gauche:nouvelle_longueur_droite] = 0
 
-    plt.figure() and plt.imshow(filtered_image)
-    return nouvelle_largeur_haut, nouvelle_largeur_bas, nouvelle_longueur_gauche, nouvelle_longueur_droite
+    # plt.figure() and plt.imshow(filtered_image)
+    return (nouvelle_largeur_haut, nouvelle_largeur_bas, nouvelle_longueur_gauche, nouvelle_longueur_droite,
+            img_sans_capteur)
 
 
 def contour_bac(image1, image2):
-    # definir la surface dans le bac
+    """ definir les contour finaux du bac, a partir des contours de bac de deux photos """
 
-    haut_left, bas_left, gauche_left, droite_left = bord_bac(image1)
-    haut_right, bas_right, gauche_right, droite_right = bord_bac(image1)
+    # definir la colone et la ligne centrale
+    height, width, color = image1.shape
+    centre_colonne = width // 2
+    centre_ligne = height // 2
 
-    haut = max(haut_left, haut_right)
-    bas = min(bas_left, bas_right)
-    gauche = max(gauche_left, gauche_right)
-    droite = min(droite_left, droite_right)
-    '''
-    if bas - haut > 1.2 * (droite - gauche):
-        if bas - centre_ligne < centre_ligne - haut:
-            haut = max(haut, int(bas-1.2*(droite - gauche)))
+    # charger les contours de bac des images 1 et 2
+    haut_left, bas_left, gauche_left, droite_left = bord_bac(image1)[:-1]
+    haut_right, bas_right, gauche_right, droite_right = bord_bac(image2)[:-1]
+
+    # definir les nouveaux contours du bac
+    h = max(haut_left, haut_right)
+    b = min(bas_left, bas_right)
+    g = max(gauche_left, gauche_right)
+    d = min(droite_left, droite_right)
+
+    # ajouter un bord manquant
+    if b - h > 1.5 * (d - g):
+        if b - centre_ligne < centre_ligne - h:
+            h = max(h, int(b - 1.2 * (d - g)))
         else:
-            bas = min(bas, int(haut+1.2*(droite - gauche)))
-
-    if droite - gauche > 0.8 * (bas - haut):
-        if droite - centre_colonne < centre_colonne - gauche:
-            gauche = max(gauche, int(droite-0.8*(bas-haut)))
+            b = min(b, int(h + 1.2 * (d - g)))
+    if d - g > 1 * (b - h):
+        if d - centre_colonne < centre_colonne - g:
+            g = max(g, int(d - 0.8 * (b - h)))
         else:
-            droite = min(droite, int(gauche+0.8*(bas-haut)))
-    '''
-    return haut, bas, gauche, droite
+            d = min(d, int(g + 0.8 * (b - h)))
+
+    return h, b, g, d
 
 
 def carte_profondeur(image1, image2):
+    """ cretation d'une carte de profondeur a partir de deux images """
 
     # conversion en niveaux de gris
     img_l = cv.cvtColor(image1, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
@@ -178,48 +211,40 @@ def carte_profondeur(image1, image2):
     disparity = cv.resize(disparity * isubsampling, (w_ori, h_ori), interpolation=cv.INTER_AREA)
 
     # affichage de la carte de disparite
-    # plt.figure() and plt.imshow(rgblCalRect)
-    plt.figure() and plt.imshow(disparity, cmap='jet', vmin=np.nanquantile(disparity, 0.005),
+    '''
+    plt.figure() and plt.imshow(disparity, cmap='jet', vmin=np.nanquantile(disparity, 0.005), 
                                 vmax=np.nanquantile(disparity, 0.995))
+    '''
 
-    # calcul et affichage de la carte de profondeur
-    '''
-    Z = abs(FL * B / disparity)
-    plt.figure() and plt.imshow(Z, cmap='jet', vmin=800, vmax=1500)
-    '''
-    # calcul et affichage de la carte de profondeur 2
+    # calcul de la carte de profondeur
     xyz_image = cv.reprojectImageTo3D(disparity, Q)
     x_image, y_image, z_image = cv.split(xyz_image)
-    # mask_distance = z_image > 1400  # Masque en fonction de la distance
-    # z_image[mask_distance] = np.nan
-    # mask_distance2 = z_image < 600
-    # z_image[mask_distance2] = np.nan
+
+    # affichage de la carte de profondeur
     '''
     plt.figure()
     plt.imshow(z_image, cmap='jet', vmin=800, vmax=1500)
-    plt.colorbar()
+    '''
+    # calcul et affichage de la carte de profondeur 2
+    '''
+     Z = abs(FL * B / disparity)
+     plt.figure() and plt.imshow(Z, cmap='jet', vmin=800, vmax=1500)
     '''
 
     return z_image
 
 
-# Extraire la région du bac
+# carte de profondeur, avec suppression du capteur
+depth_image1 = carte_profondeur(bord_bac(image_left)[4], image_right)
+depth_image2 = carte_profondeur(image_left, bord_bac(image_right)[4])
+depth_image = (depth_image1 * depth_image2) / depth_image1
+
+plt.figure() and plt.imshow(depth_image, cmap='jet', vmin=800, vmax=1500)
+
+# Extraire la region du bac
 haut, bas, gauche, droite = contour_bac(image_left, image_right)
-depth_image = carte_profondeur(image_left, image_right)
 image_cut = np.zeros_like(depth_image, dtype='float32')
 image_cut[haut:bas, gauche:droite] = depth_image[haut:bas, gauche:droite]
+
 plt.figure() and plt.imshow(image_cut, cmap='jet', vmin=800, vmax=1500)
-
-
-def raccourcir_image(image):
-    hauteur, largeur = image.shape[:2]
-    # Calculer les nouvelles dimensions
-    nouvelle_largeur = int(largeur * 0.75)
-    g = int((largeur - nouvelle_largeur) / 2)
-    d = largeur - g
-    # Recadrer l'image
-    photo = image[:, g:d]
-
-    return photo
-# racourcir image
-# z_image = raccourcir_image(z_image)
+plt.figure() and plt.imshow(image_left)
