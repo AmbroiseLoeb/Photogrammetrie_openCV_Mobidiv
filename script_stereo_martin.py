@@ -1,42 +1,10 @@
 # importation des bibliotheques
+import os
 import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
 import scipy.ndimage as ndi
-
 '''matplotlib.use('TkAgg')  # pour afficher les plt en popup'''
-
-# chargement des parametres stereo
-stereo_path = "/home/loeb/Documents/PycharmProjects/Photogrammetrie_openCV_Mobidiv/calibration"
-Q = np.load(stereo_path + f"/Q.npy")
-FL = np.load(stereo_path + "/P1.npy")[0][0]
-T = np.load(stereo_path + "/T.npy")
-B = np.linalg.norm(T)
-mapx11 = np.load(stereo_path + "/mapx11.npy")
-mapx12 = np.load(stereo_path + "/mapx12.npy")
-mapx21 = np.load(stereo_path + "/mapx21.npy")
-mapx22 = np.load(stereo_path + "/mapx22.npy")
-
-# definition des parametres de disparite
-Dmax = 100 * 1000
-Dmin = .5 * 1000
-blockSize = 5
-MinDisp = int(np.floor(FL * B / Dmax))
-MaxDisp = int(np.ceil(FL * B / Dmin))
-numDisparities = MaxDisp - MinDisp
-if T[np.argmax(abs(T))] > 0:
-    min_disp = - MaxDisp
-else:
-    min_disp = MinDisp
-
-# chargement des images gauche et droite
-left_path = ("/home/loeb/Documents/Literal_mobidiv_2023/Session 2023-06-22 06-32-00"
-             "/uplot_100_1/uplot_100_camera_1_2_RGB.jpg")
-id_image = left_path.split('camera_1')
-right_path = 'camera_2'.join(id_image)
-
-image_left = cv.imread(left_path)
-image_right = cv.imread(right_path)
 
 
 def raccourcir_image(image):
@@ -85,9 +53,11 @@ def bord_bac(image):
 
     for label in range(1, nb_labels + 1):
         if 1200 <= coordinates[label][0] <= 2500 and 1500 <= coordinates[label][1] <= 3200:  # capteur
-            if 20000 * 255 <= sizes[label] <= 60000 * 255:
+            if 20000 * 255 <= sizes[label] <= 80000 * 255:
                 img_sans_capteur[labels == label] = (0, 0, 0, 0)
                 seuil2 = 100000  # augmentation du seuil en cas de présence du capteur
+            elif sizes[label] >= 20000 * 255:
+                filtered_image[labels == label] = 255
         elif sizes[label] >= 300 * 255:
             filtered_image[labels == label] = 255
     # plt.figure() and plt.imshow(filtered_image)
@@ -174,6 +144,29 @@ def contour_bac(image1, image2):
 def carte_profondeur(image1, image2):
     """ cretation d'une carte de profondeur a partir de deux images """
 
+    # chargement des parametres stereo
+    stereo_path = "/home/loeb/Documents/PycharmProjects/Photogrammetrie_openCV_Mobidiv/calibration"
+    Q = np.load(stereo_path + f"/Q.npy")
+    FL = np.load(stereo_path + "/P1.npy")[0][0]
+    T = np.load(stereo_path + "/T.npy")
+    B = np.linalg.norm(T)
+    mapx11 = np.load(stereo_path + "/mapx11.npy")
+    mapx12 = np.load(stereo_path + "/mapx12.npy")
+    mapx21 = np.load(stereo_path + "/mapx21.npy")
+    mapx22 = np.load(stereo_path + "/mapx22.npy")
+
+    # definition des parametres de disparite
+    Dmax = 100 * 1000
+    Dmin = .5 * 1000
+    blockSize = 5
+    MinDisp = int(np.floor(FL * B / Dmax))
+    MaxDisp = int(np.ceil(FL * B / Dmin))
+    numDisparities = MaxDisp - MinDisp
+    if T[np.argmax(abs(T))] > 0:
+        min_disp = - MaxDisp
+    else:
+        min_disp = MinDisp
+
     # conversion en niveaux de gris
     img_l = cv.cvtColor(image1, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
     img_r = cv.cvtColor(image2, cv.IMREAD_GRAYSCALE + cv.IMREAD_IGNORE_ORIENTATION)
@@ -234,17 +227,47 @@ def carte_profondeur(image1, image2):
     return z_image
 
 
-# carte de profondeur, avec suppression du capteur
-depth_image1 = carte_profondeur(bord_bac(image_left)[4], image_right)
-depth_image2 = carte_profondeur(image_left, bord_bac(image_right)[4])
-depth_image = (depth_image1 * depth_image2) / depth_image1
+# PATH
+PATH = "/home/loeb/Documents/Literal_mobidiv_2023"
+sessionlist = os.listdir(PATH)
 
-plt.figure() and plt.imshow(depth_image, cmap='jet', vmin=800, vmax=1500)
+for session in sessionlist:
+    if session.find("Session") == 0:
+        print(session)
+        plotlist = os.listdir(PATH + "/" + session)
+        if not os.path.exists(PATH + "/" + session + "/" + "mask_z_map"):
+            # Crée le fichier s'il n'existe pas
+            os.makedirs(PATH + "/" + session + "/" + "mask_z_map")
+        for plot in plotlist:
+            if plot.find("uplot") == 0:
+                print(plot)
+                imglist = os.listdir(PATH + "/" + session + "/" + plot)
+                for file in imglist:
+                    if "_camera_1_2_RGB.jpg" in file:
 
-# Extraire la region du bac
-haut, bas, gauche, droite = contour_bac(image_left, image_right)
-image_cut = np.zeros_like(depth_image, dtype='float32')
-image_cut[haut:bas, gauche:droite] = depth_image[haut:bas, gauche:droite]
+                        # chargement des images gauche et droite
+                        left_path = (PATH + "/" + session + "/" + plot + "/" + file)
+                        id_image = left_path.split('camera_1')
+                        right_path = 'camera_2'.join(id_image)
 
-plt.figure() and plt.imshow(image_cut, cmap='jet', vmin=800, vmax=1500)
-plt.figure() and plt.imshow(image_left)
+                        image_left = cv.imread(left_path)
+                        image_right = cv.imread(right_path)
+
+                        # carte de profondeur, avec suppression du capteur
+                        depth_image1 = carte_profondeur(bord_bac(image_left)[4], image_right)
+                        depth_image2 = carte_profondeur(image_left, bord_bac(image_right)[4])
+                        depth_image = (depth_image1 * depth_image2) / depth_image1
+
+                        # plt.figure() and plt.imshow(depth_image, cmap='jet', vmin=800, vmax=1500)
+
+                        # Extraire la region du bac
+                        haut, bas, gauche, droite = contour_bac(image_left, image_right)
+                        image_cut = np.zeros_like(depth_image, dtype='float32')
+                        image_cut[haut:bas, gauche:droite] = depth_image[haut:bas, gauche:droite]
+
+                        plt.figure() and plt.imshow(image_cut, cmap='jet', vmin=800, vmax=1500)
+                        plt.savefig(PATH + "/" + session + "/mask_z_map/" +
+                                    os.path.basename(file).replace("camera_1_2_RGB", "z_map"), dpi='figure')
+                        plt.close()
+                        # plt.figure() and plt.imshow(image_left)
+                        print(file)
