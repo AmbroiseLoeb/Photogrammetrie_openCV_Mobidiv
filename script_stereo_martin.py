@@ -4,7 +4,6 @@ import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
 import scipy.ndimage as ndi
-'''matplotlib.use('TkAgg')  # pour afficher les plt en popup'''
 
 
 def raccourcir_image(image):
@@ -230,7 +229,6 @@ def carte_profondeur(image1, image2):
 # PATH
 PATH = "/home/loeb/Documents/Literal_mobidiv_2023"
 sessionlist = os.listdir(PATH)
-
 for session in sessionlist:
     if session.find("Session") == 0:
         print(session)
