@@ -226,18 +226,42 @@ def carte_profondeur(image1, image2):
     return z_image
 
 
+def carte_hauteur(image):
+    """ cretation d'une carte de hauteur a partir d'une carte de profondeur """
+    # Créer un masque pour les pixels vides
+
+    image[np.isnan(image)] = 0
+    image[np.isinf(image)] = 0
+    mask1 = image != 0
+    image[image < 0.05*np.mean(image[mask1])] = 0
+    img_inv = -image
+    mask2 = img_inv != 0
+    img_inv[img_inv < 1.95*np.mean(img_inv[mask2])] = 0
+
+    percentile_threshold = np.percentile(img_inv, 10)
+    new_zero = np.median(img_inv[img_inv < percentile_threshold])
+
+    # Calculer la moyenne des pixels les plus bas en utilisant le masque
+    #min_depth = np.min(img_inv)
+    #mean_min_depth = np.mean(img_inv[mask & (img_inv <= min_depth)])
+
+    # Soustraire la moyenne des pixels les plus bas de chaque pixel
+    height_map = img_inv - new_zero
+    return height_map
+
+
 # PATH
 PATH = "/home/loeb/Documents/Literal_mobidiv_2023"
 sessionlist = os.listdir(PATH)
 for session in sessionlist:
-    if session.find("Session") == 0:
+    if session.find("Session 2023-01") == 0:
         print(session)
         plotlist = os.listdir(PATH + "/" + session)
         if not os.path.exists(PATH + "/" + session + "/" + "mask_z_map"):
             # Crée le fichier s'il n'existe pas
             os.makedirs(PATH + "/" + session + "/" + "mask_z_map")
         for plot in plotlist:
-            if plot.find("uplot") == 0:
+            if plot.find("uplot_100") == 0:
                 print(plot)
                 imglist = os.listdir(PATH + "/" + session + "/" + plot)
                 for file in imglist:
@@ -262,10 +286,15 @@ for session in sessionlist:
                         haut, bas, gauche, droite = contour_bac(image_left, image_right)
                         image_cut = np.zeros_like(depth_image, dtype='float32')
                         image_cut[haut:bas, gauche:droite] = depth_image[haut:bas, gauche:droite]
-
                         plt.figure() and plt.imshow(image_cut, cmap='jet', vmin=800, vmax=1500)
-                        plt.savefig(PATH + "/" + session + "/mask_z_map/" +
+
+                        # Carte de hauteur
+                        z_map = carte_hauteur(image_cut)
+                        plt.figure() and plt.imshow(z_map, cmap='jet', vmin=-10, vmax=500)
+
+                        '''plt.savefig(PATH + "/" + session + "/mask_z_map/" +
                                     os.path.basename(file).replace("camera_1_2_RGB", "z_map"), dpi='figure')
-                        plt.close()
-                        # plt.figure() and plt.imshow(image_left)
+                        plt.close()'''
+
+                        plt.figure() and plt.imshow(image_left)
                         print(file)
