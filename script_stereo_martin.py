@@ -226,6 +226,7 @@ def carte_profondeur(image1, image2):
     return z_image
 
 
+
 # PATH
 PATH = "/home/loeb/Documents/Literal_mobidiv_2023"
 sessionlist = os.listdir(PATH)
