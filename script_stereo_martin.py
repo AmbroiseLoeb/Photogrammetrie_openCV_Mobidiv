@@ -4,6 +4,8 @@ import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
 import scipy.ndimage as ndi
+from scipy.ndimage.filters import maximum_filter
+from scipy.ndimage.morphology import generate_binary_structure, binary_erosion
 
 
 def raccourcir_image(image):
@@ -238,7 +240,7 @@ def carte_hauteur(image):
     mask2 = img_inv != 0
     img_inv[img_inv < 1.95*np.mean(img_inv[mask2])] = 0
 
-    percentile_threshold = np.percentile(img_inv, 10)
+    percentile_threshold = np.percentile(img_inv, 3)
     new_zero = np.median(img_inv[img_inv < percentile_threshold])
 
     # Calculer la moyenne des pixels les plus bas en utilisant le masque
@@ -247,7 +249,71 @@ def carte_hauteur(image):
 
     # Soustraire la moyenne des pixels les plus bas de chaque pixel
     height_map = img_inv - new_zero
-    return height_map
+    return height_map, new_zero
+
+
+def filter_heights(image):
+    rows, cols = image.shape
+    filtered_image = np.copy(image)
+
+    # Définir les indices des voisins directs (haut, bas, gauche, droite)
+    neighbors_indices = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, -1), (1, -1), (1, 1),
+                         (-2, 0), (2, 0), (0, -2), (0, 2), (-2, -2), (2, -2), (2, -2), (2, 2)]
+
+    # Définir une fonction pour vérifier si un pixel a un voisin dont la valeur est supérieure
+    def has_superior_neighbor(row, col):
+        for dr, dc in neighbors_indices:
+            r, c = row + dr, col + dc
+            if 0 <= r < rows and 0 <= c < cols and image[r, c] > image[row, col]:
+                return True
+        return False
+
+    # Parcourir tous les pixels et mettre à zéro ceux qui ont des voisins supérieurs
+    for i in range(rows):
+        for j in range(cols):
+            if filtered_image[i, j] > 0 and has_superior_neighbor(i, j):
+                filtered_image[i, j] = 0
+
+    return filtered_image
+
+
+def filtre_points_aberrants(matrice):
+    """
+    Supprime les points aberrants jusqu'à ce que la variation de la moyenne soit inférieure à 10%.
+
+    Args:
+        matrice (numpy.ndarray): La matrice à traiter.
+
+    Returns:
+        numpy.ndarray: La matrice avec les points aberrants remplacés par NaN.
+    """
+    matrice_filtree = matrice.copy()  # Copie de la matrice pour éviter les modifications inattendues
+    matrice_filtree[np.isinf(matrice_filtree)] = np.nan
+
+    while True:
+        # Calculer la moyenne actuelle
+        moyenne_actuelle = np.nanmean(matrice_filtree)
+
+        # Trouver un seuil pour filtrer les points aberrants
+        ecart_type = np.nanstd(matrice_filtree)
+        limite_inf = moyenne_actuelle - 5 * ecart_type
+        limite_sup = moyenne_actuelle + 2 * ecart_type
+
+        # Remplacer les points aberrants par NaN
+        nouvelle_matrice_filtree = matrice_filtree.copy()
+        nouvelle_matrice_filtree[(matrice_filtree < limite_inf) | (matrice_filtree > limite_sup)] = np.nan
+
+        # Calculer la nouvelle moyenne
+        nouvelle_moyenne = np.nanmean(nouvelle_matrice_filtree)
+
+        # Si la variation de la moyenne est inférieure à 10%, arrêter
+        if abs(nouvelle_moyenne - moyenne_actuelle) / moyenne_actuelle < 0.0001:
+            break
+
+        # Mettre à jour la matrice filtrée
+        matrice_filtree = nouvelle_matrice_filtree
+
+    return matrice_filtree
 
 
 # PATH
@@ -261,7 +327,7 @@ for session in sessionlist:
             # Crée le fichier s'il n'existe pas
             os.makedirs(PATH + "/" + session + "/" + "mask_z_map")
         for plot in plotlist:
-            if plot.find("uplot_100") == 0:
+            if plot.find("uplot_107") == 0:
                 print(plot)
                 imglist = os.listdir(PATH + "/" + session + "/" + plot)
                 for file in imglist:
@@ -279,18 +345,19 @@ for session in sessionlist:
                         depth_image1 = carte_profondeur(bord_bac(image_left)[4], image_right)
                         depth_image2 = carte_profondeur(image_left, bord_bac(image_right)[4])
                         depth_image = (depth_image1 * depth_image2) / depth_image1
-
                         # plt.figure() and plt.imshow(depth_image, cmap='jet', vmin=800, vmax=1500)
 
                         # Extraire la region du bac
                         haut, bas, gauche, droite = contour_bac(image_left, image_right)
-                        image_cut = np.zeros_like(depth_image, dtype='float32')
-                        image_cut[haut:bas, gauche:droite] = depth_image[haut:bas, gauche:droite]
+                        #image_cut = np.zeros_like(depth_image, dtype='float32')
+                        #image_cut[haut:bas, gauche:droite] = depth_image[haut:bas, gauche:droite]
+                        image_cut = depth_image[haut:bas, gauche:droite]
+
                         plt.figure() and plt.imshow(image_cut, cmap='jet', vmin=800, vmax=1500)
 
                         # Carte de hauteur
-                        z_map = carte_hauteur(image_cut)
-                        plt.figure() and plt.imshow(z_map, cmap='jet', vmin=-10, vmax=500)
+                        #z_map, vmax = carte_hauteur(image_cut)
+                        #plt.figure() and plt.imshow(z_map, cmap='jet', vmin=-50, vmax=- vmax)
 
                         '''plt.savefig(PATH + "/" + session + "/mask_z_map/" +
                                     os.path.basename(file).replace("camera_1_2_RGB", "z_map"), dpi='figure')
@@ -298,3 +365,75 @@ for session in sessionlist:
 
                         plt.figure() and plt.imshow(image_left)
                         print(file)
+
+                        mat_filtree = filtre_points_aberrants(image_cut)
+                        plt.figure() and plt.imshow(mat_filtree, cmap='jet', vmin=800, vmax=1500)
+
+
+                        # Taille des zones représentant 10% de la matrice
+                        zone_size = (int(mat_filtree.shape[0] * 0.1), int(mat_filtree.shape[1] * 0.1))
+                        # Calculer le nombre total de zones dans la matrice
+                        nombre_zones = (mat_filtree.shape[0] // zone_size[0]) * (mat_filtree.shape[1] // zone_size[1])
+
+                        # Initialiser les listes pour stocker les résultats
+                        max_locals = []
+                        sol_locals = []
+                        hauteur = []
+
+                        # Parcourir chaque zone
+                        for i in range(0, mat_filtree.shape[0], zone_size[0]):
+                            for j in range(0, mat_filtree.shape[1], zone_size[1]):
+                                # Extraire la zone actuelle
+                                zone = mat_filtree[i:i + zone_size[0], j:j + zone_size[1]]
+
+                                # Calculer max_local et sol_local pour la zone
+                                zone_sans_nan = zone[~np.isnan(zone)]
+                                max_local = np.median(np.sort(zone_sans_nan.flatten())[::-1][:int(zone_sans_nan.size * 0.1)])
+                                sol_local = np.median(np.sort(zone_sans_nan.flatten())[:int(zone_sans_nan.size * 0.1)])
+
+                                # Ajouter les résultats à la liste
+                                max_locals.append(max_local)
+                                sol_locals.append(sol_local)
+                                hauteur.append(max_local - sol_local)
+
+                        # Convertir les listes en tableaux numpy
+                        max_locals = np.array(max_locals)
+                        sol_locals = np.array(sol_locals)
+                        hauteur = np.array(hauteur)
+
+                        mat_hauteur = mat_filtree
+                        index = 0
+                        for i in range(0, mat_hauteur.shape[0], zone_size[0]):
+                            for j in range(0, mat_hauteur.shape[1], zone_size[1]):
+                                # Assigner la valeur de hauteur correspondante à chaque point de la zone
+                                mat_hauteur[i:i + zone_size[0], j:j + zone_size[1]] = hauteur[index]
+                                index += 1
+                        plt.figure() and plt.imshow(mat_hauteur, cmap='jet', vmin=0, vmax=500)
+
+                        '''
+                        z_map[z_map > 500] = 0
+                        carte_sommets = filter_heights(z_map)
+                        plt.figure() and plt.imshow(carte_sommets)
+                        hauteurs_max = carte_sommets[carte_sommets > 0]
+                        hauteur_max_moyenne = np.mean(hauteurs_max)
+                        hauteur_max_mediane = np.median(hauteurs_max)
+                        hauteur_max_maximale = np.max(hauteurs_max)
+                        hauteur_max_minimale = np.min(hauteurs_max)
+                        '''
+
+                        '''
+                        z_map[z_map > 500] = 0
+                        struct = generate_binary_structure(2, 1)
+                        voisins = maximum_filter(z_map, footprint=struct) == z_map
+                        maxima = z_map * voisins
+                        # Suppression des maxima qui ne sont pas des pics locaux
+                        non_maxima = (maxima == 0)
+                        erosion = binary_erosion(maxima, structure=struct, iterations=1000, border_value=1)
+                        maxima_locaux = maxima * (erosion == 0)
+                        plt.figure() and plt.imshow(maxima_locaux, cmap='jet', vmin=-0, vmax=300)
+                        hauteurs_max = maxima_locaux[maxima_locaux > 0]
+                        hauteur_max_moyenne = np.mean(hauteurs_max)
+                        hauteur_max_mediane = np.median(hauteurs_max)
+                        hauteur_max_maximale = np.max(hauteurs_max)
+                        hauteur_max_minimale = np.min(hauteurs_max)
+                        '''
