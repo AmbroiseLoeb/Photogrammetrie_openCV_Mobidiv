@@ -4,8 +4,7 @@ import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
 import scipy.ndimage as ndi
-# from scipy.ndimage.filters import maximum_filter
-# from scipy.ndimage.morphology import generate_binary_structure, binary_erosion
+import csv
 
 
 def raccourcir_image(image):
@@ -58,7 +57,7 @@ def bord_bac(image):
                 img_sans_capteur[labels == label] = (0, 0, 0, 0)
                 seuil2 = 100000  # augmentation du seuil en cas de présence du capteur
                 filtered_image[labels == label] = 255
-            elif sizes[label] >= 10000 * 255:
+            elif sizes[label] >= 5000 * 255:
                 filtered_image[labels == label] = 255
         elif sizes[label] >= 300 * 255:
             filtered_image[labels == label] = 255
@@ -66,8 +65,8 @@ def bord_bac(image):
 
     # filtered_image = thresholded_img
     # paramettres pour recherche des bords de bac
-    largueur_min = 1400*0
-    longueur_min = 1600*0
+    largueur_min = 1000*0
+    longueur_min = 1200*0
     nouvelle_longueur = 0
     nouvelle_largeur = 0
     seuil_bordure = 20000
@@ -75,9 +74,10 @@ def bord_bac(image):
     nouvelle_largeur_bas = centre_ligne
     nouvelle_longueur_gauche = centre_colonne
     nouvelle_longueur_droite = centre_colonne
+    n = 0
 
     # Recherche des bords de bac
-    while nouvelle_longueur <= longueur_min or nouvelle_largeur <= largueur_min:
+    while nouvelle_longueur <= longueur_min or nouvelle_largeur <= largueur_min and n <= 2:
         if nouvelle_largeur <= largueur_min:
             colonne = centre_colonne
             for colonne in range(centre_colonne, width):
@@ -94,17 +94,18 @@ def bord_bac(image):
         if nouvelle_longueur <= longueur_min:
             ligne = centre_ligne
             for ligne in range(centre_ligne, height):
-                if np.sum(filtered_image[ligne, 1800:3200]) > max(seuil_bordure, seuil2):
+                if np.sum(filtered_image[ligne, min(1800, nouvelle_longueur_gauche):min(3200, nouvelle_longueur_droite)]) > max(seuil_bordure, seuil2):
                     break
             nouvelle_largeur_bas = ligne
 
             for ligne in range(centre_ligne - 100, -1, -1):
-                if np.sum(filtered_image[ligne, 1800:3200]) > max(seuil_bordure, seuil2):
+                if np.sum(filtered_image[ligne, min(1800, nouvelle_longueur_gauche):min(3200, nouvelle_longueur_droite)]) > max(seuil_bordure, seuil2):
                     break
             nouvelle_largeur_haut = ligne
             nouvelle_longueur = nouvelle_largeur_bas - nouvelle_largeur_haut
 
         filtered_image[nouvelle_largeur_haut:nouvelle_largeur_bas, nouvelle_longueur_gauche:nouvelle_longueur_droite] = 0
+        n = n+1
 
     # plt.figure() and plt.imshow(filtered_image)
     return (nouvelle_largeur_haut, nouvelle_largeur_bas, nouvelle_longueur_gauche, nouvelle_longueur_droite,
@@ -138,7 +139,7 @@ def contour_bac(image1, image2):
 
 
 # ajouter un bord manquant
-    '''
+
     if b - h > 1.5 * (d - g):
         if b - centre_ligne < centre_ligne - h:
             h = max(h, int(b - 1.2 * (d - g)))
@@ -149,7 +150,7 @@ def contour_bac(image1, image2):
             g = max(g, int(d - 0.8 * (b - h)))
         else:
             d = min(d, int(g + 0.8 * (b - h)))
-    '''
+
     return h, b, g, d
 
 
@@ -239,30 +240,6 @@ def carte_profondeur(image1, image2):
     return z_image
 
 
-def carte_hauteur(image):
-    """ cretation d'une carte de hauteur a partir d'une carte de profondeur """
-    # Créer un masque pour les pixels vides
-
-    image[np.isnan(image)] = 0
-    image[np.isinf(image)] = 0
-    mask1 = image != 0
-    image[image < 0.05*np.mean(image[mask1])] = 0
-    img_inv = -image
-    mask2 = img_inv != 0
-    img_inv[img_inv < 1.95*np.mean(img_inv[mask2])] = 0
-
-    percentile_threshold = np.percentile(img_inv, 3)
-    new_zero = np.median(img_inv[img_inv < percentile_threshold])
-
-    # Calculer la moyenne des pixels les plus bas en utilisant le masque
-    #min_depth = np.min(img_inv)
-    #mean_min_depth = np.mean(img_inv[mask & (img_inv <= min_depth)])
-
-    # Soustraire la moyenne des pixels les plus bas de chaque pixel
-    height_map = img_inv - new_zero
-    return height_map, new_zero
-
-
 def filtre_points_aberrants(matrice):
     """ Supprime les points aberrants jusqu'à ce que la variation de la moyenne soit inférieure à seuil_stable_moy % """
     matrice_filtree = matrice.copy()  # Copie de la matrice pour éviter les modifications inattendues
@@ -276,7 +253,7 @@ def filtre_points_aberrants(matrice):
         # Trouver un seuil pour filtrer les points aberrants
         ecart_type = np.nanstd(matrice_filtree)
         limite_inf = moyenne_actuelle - 5 * ecart_type
-        limite_sup = moyenne_actuelle + 5 * ecart_type
+        limite_sup = moyenne_actuelle + 4 * ecart_type
 
         # Remplacer les points aberrants par NaN
         nouvelle_matrice_filtree = matrice_filtree.copy()
@@ -306,7 +283,7 @@ def hauteur_locale(matrice):
     sol_locaux = []
     hauteur = []
     mat_sans_nan = matrice[~np.isnan(matrice)]
-    sol_bac = np.median(np.sort(mat_sans_nan.flatten())[::-1][:int(mat_sans_nan.size * 0.1)])
+    sol_bac = np.median(np.sort(mat_sans_nan.flatten())[::-1][:int(mat_sans_nan.size * 0.02)])
 
     # Parcourir chaque zone
     for i in range(0, matrice.shape[0], zone_size[0]):
@@ -316,44 +293,48 @@ def hauteur_locale(matrice):
 
             # Calculer max_local et sol_local pour la zone
             zone_sans_nan = zone[~np.isnan(zone)]
-            max_local = np.median(np.sort(zone_sans_nan.flatten())[:int(zone_sans_nan.size * 0.1)])
+            max_local = np.median(np.sort(zone_sans_nan.flatten())[:int(zone_sans_nan.size * 0.05)])
             sol_local = np.median(np.sort(zone_sans_nan.flatten())[::-1][:int(zone_sans_nan.size * 0.1)])
 
-            # Ajouter les résultats à la liste
-            max_locals.append(max_local)
-            sol_locaux.append(sol_local)
-            if sol_bac - 50 <= sol_local <= sol_bac + 50:
-                hauteur.append(sol_local - max_local)
+            if zone.shape[0]*zone.shape[1] <= 0.5 * zone_size[0]*zone_size[1]:
+                hauteur.append(np.nan)
             else:
-                hauteur.append(sol_bac - max_local)
+                # Ajouter les résultats à la liste
+                max_locals.append(max_local)
+                sol_locaux.append(sol_local)
+                if sol_bac - 50 <= sol_local <= sol_bac + 50:
+                    hauteur.append(sol_local - max_local)
+                else:
+                    hauteur.append(sol_bac - max_local)
 
     # Convertir les listes en tableaux numpy
     max_locals = np.array(max_locals)
     sol_locaux = np.array(sol_locaux)
-    hauteur = np.array(hauteur)
+    hauteur_a = np.array(hauteur)
+    hauteur = hauteur_a[~np.isnan(hauteur_a)]
 
     mat_hauteur = matrice.copy()  # Copie de mat_filtree pour ne pas modifier l'original
     index = 0
     for i in range(0, mat_hauteur.shape[0], zone_size[0]):
         for j in range(0, mat_hauteur.shape[1], zone_size[1]):
             # Assigner la valeur de hauteur correspondante à chaque point de la zone
-            mat_hauteur[i:i + zone_size[0], j:j + zone_size[1]] = hauteur[index]
+            mat_hauteur[i:i + zone_size[0], j:j + zone_size[1]] = hauteur_a[index]
             index += 1
 
-    return mat_hauteur
+    return hauteur, mat_hauteur
 
 
 # PATH
 PATH = "/home/loeb/Documents/Comparaison_mesures"
 sessionlist = os.listdir(PATH)
-for session in sessionlist:
+for session in sorted(sessionlist):
     if session.find("Session") == 0:
         print(session)
         plotlist = os.listdir(PATH + "/" + session)
         if not os.path.exists(PATH + "/" + session + "/" + "mask_z_map"):
             # Crée le fichier s'il n'existe pas
             os.makedirs(PATH + "/" + session + "/" + "mask_z_map")
-        for plot in plotlist:
+        for plot in sorted(plotlist):
             if plot.find("uplot") == 0:
                 print(plot)
                 imglist = os.listdir(PATH + "/" + session + "/" + plot)
@@ -367,7 +348,7 @@ for session in sessionlist:
 
                         image_left = cv.imread(left_path)
                         image_right = cv.imread(right_path)
-                        plt.figure() and plt.imshow(image_left)
+                        # plt.figure() and plt.imshow(image_left)
 
                         # carte de profondeur, avec suppression du capteur
                         depth_image1 = carte_profondeur(bord_bac(image_left)[4], image_right)
@@ -380,21 +361,35 @@ for session in sessionlist:
                         image_cut = np.zeros_like(depth_image, dtype='float32')
                         image_cut[haut:bas, gauche:droite] = depth_image[haut:bas, gauche:droite]
                         # image_cut = depth_image[haut:bas, gauche:droite]
-                        # plt.figure() and plt.imshow(image_cut, cmap='jet', vmin=800, vmax=1500)
+                        # plt.figure() and plt.imshow(image_cut, cmap='jet', vmin=800, vmax=2000)
 
                         print(file)
 
                         # plt.figure() and plt.imshow(image_cut[haut:bas, gauche:droite], cmap='jet', vmin=500, vmax=2000)
                         mat_filtree = filtre_points_aberrants(image_cut[haut:bas, gauche:droite])
-                        # mat_filtree = image_cut
+
+                        # Exporter z_map vers dosier mask_z_map
                         plt.figure() and plt.imshow(mat_filtree, cmap='jet', vmin=800, vmax=2000)
-                        '''
                         plt.savefig(PATH + "/" + session + "/mask_z_map/" +
                                     os.path.basename(file).replace("camera_1_2_RGB", plot + "_z_map"), dpi='figure')
                         plt.close()
-                        '''
 
-                        mat_hauteur = hauteur_locale(mat_filtree)
-                        plt.figure()
-                        plt.imshow(mat_hauteur, cmap='jet', vmin=0, vmax=1000)
-                        plt.show()
+                        # Calcul des hauteurs locales
+                        liste_hauteurs, z_mat = hauteur_locale(mat_filtree)
+                        print(liste_hauteurs)
+                        # plt.figure() and plt.imshow(z_mat, cmap='jet', vmin=0, vmax=1000)
+
+                        # Export des hauteurs locales en csv
+                        with open(PATH + "/" + session + "/" + "hauteurs_l_opencv.csv", 'a', newline='') as csvfile:
+                            csv_writer = csv.writer(csvfile)
+
+                            # Écriture de la première ligne avec 'plot' et les valeurs de 'liste_hauteurs'
+                            csv_writer.writerow([session] + [plot] + [str(h) for h in liste_hauteurs])
+
+    # csv en ligne -> csv en colonne
+    with open(PATH + "/" + session + "/" + "hauteurs_l_opencv.csv", 'r') as csvfile_temp, open(PATH + "/" + session + "/" + "hauteurs_c_opencv.csv", 'w', newline='') as csvfile_final:
+        csv_reader = csv.reader(csvfile_temp)
+        csv_writer = csv.writer(csvfile_final)
+        data_transposed = list(zip(*csv_reader))
+        csv_writer.writerows(data_transposed)
+
