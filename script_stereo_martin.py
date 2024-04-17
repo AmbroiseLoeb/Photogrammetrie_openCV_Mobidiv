@@ -327,19 +327,19 @@ def hauteur_locale(matrice, nombre_zones):
 
 # PATH
 PATH = "/home/loeb/Documents/Comparaison_mesures"
+n_zones = 100
+print('nombre de zones =', n_zones)
+csv_path = PATH + "/" + "hauteurs_opencv" + str(n_zones) + ".csv"
 sessionlist = os.listdir(PATH)
 for session in sorted(sessionlist):
     if session.find("Session") == 0:
         print(session)
-        n_zones = 100
-        print('nombre de zones =', n_zones)
-        csv_path = PATH + "/" + session + "/" + "hauteurs_opencv" + str(n_zones) + ".csv"
         plotlist = os.listdir(PATH + "/" + session)
         if not os.path.exists(PATH + "/" + session + "/" + "mask_z_map"):
             # Crée le fichier s'il n'existe pas
             os.makedirs(PATH + "/" + session + "/" + "mask_z_map")
         for plot in sorted(plotlist):
-            if plot.find("uplot") == 0:
+            if plot.find("uplot_7_1") == 0:
                 print(plot)
                 imglist = os.listdir(PATH + "/" + session + "/" + plot)
                 for file in imglist:
@@ -391,9 +391,10 @@ for session in sorted(sessionlist):
                             csv_writer = csv.writer(csvfile)
                             csv_writer.writerow([session] + [plot] + [str(h) for h in liste_hauteurs])
 
-        # csv en ligne -> csv en colonne
-        with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'r') as csvfile_temp, open(csv_path, 'w', newline='') as csvfile_final:
-            csv_reader = csv.reader(csvfile_temp)
-            csv_writer = csv.writer(csvfile_final)
-            data_transposed = list(zip(*csv_reader))
-            csv_writer.writerows(data_transposed)
+# csv en ligne -> csv en colonne
+with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'r') as csvfile_temp, open(csv_path, 'w', newline='') as csvfile_final:
+    csv_reader = csv.reader(csvfile_temp)
+    csv_writer = csv.writer(csvfile_final)
+    data_transposed = list(zip(*csv_reader))
+    csv_writer.writerows(data_transposed)
+os.remove(os.path.basename(csv_path).replace(".csv", "_temporary.csv"))
