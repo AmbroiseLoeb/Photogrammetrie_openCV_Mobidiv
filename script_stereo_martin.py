@@ -1,5 +1,6 @@
 # importation des bibliotheques
 import os
+import math
 import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
@@ -272,11 +273,11 @@ def filtre_points_aberrants(matrice):
     return matrice_filtree
 
 
-def hauteur_locale(matrice):
-    # Taille des zones représentant 10% de la matrice
-    zone_size = (int(matrice.shape[0] * 0.1), int(matrice.shape[1] * 0.1))
+def hauteur_locale(matrice, nombre_zones):
+    # Taille des zones représentant n% de la matrice
+    coeff = 1/math.sqrt(nombre_zones)
+    zone_size = (int(matrice.shape[0] * coeff), int(matrice.shape[1] * coeff))
     # Calculer le nombre total de zones dans la matrice
-    nombre_zones = (matrice.shape[0] // zone_size[0]) * (matrice.shape[1] // zone_size[1])
 
     # Initialiser les listes pour stocker les résultats
     max_locals = []
@@ -330,6 +331,9 @@ sessionlist = os.listdir(PATH)
 for session in sorted(sessionlist):
     if session.find("Session") == 0:
         print(session)
+        n_zones = 100
+        print('nombre de zones =', n_zones)
+        csv_path = PATH + "/" + session + "/" + "hauteurs_opencv" + str(n_zones) + ".csv"
         plotlist = os.listdir(PATH + "/" + session)
         if not os.path.exists(PATH + "/" + session + "/" + "mask_z_map"):
             # Crée le fichier s'il n'existe pas
@@ -365,31 +369,31 @@ for session in sorted(sessionlist):
 
                         print(file)
 
+                        # Filtre des points aberrants
                         # plt.figure() and plt.imshow(image_cut[haut:bas, gauche:droite], cmap='jet', vmin=500, vmax=2000)
                         mat_filtree = filtre_points_aberrants(image_cut[haut:bas, gauche:droite])
 
+                        '''
                         # Exporter z_map vers dosier mask_z_map
                         plt.figure() and plt.imshow(mat_filtree, cmap='jet', vmin=800, vmax=2000)
                         plt.savefig(PATH + "/" + session + "/mask_z_map/" +
                                     os.path.basename(file).replace("camera_1_2_RGB", plot + "_z_map"), dpi='figure')
                         plt.close()
+                        '''
 
                         # Calcul des hauteurs locales
-                        liste_hauteurs, z_mat = hauteur_locale(mat_filtree)
+                        liste_hauteurs, z_mat = hauteur_locale(mat_filtree, n_zones)
                         print(liste_hauteurs)
-                        # plt.figure() and plt.imshow(z_mat, cmap='jet', vmin=0, vmax=1000)
+                        plt.figure() and plt.imshow(z_mat, cmap='jet', vmin=0, vmax=1000)
 
                         # Export des hauteurs locales en csv
-                        with open(PATH + "/" + session + "/" + "hauteurs_l_opencv.csv", 'a', newline='') as csvfile:
+                        with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'a', newline='') as csvfile:
                             csv_writer = csv.writer(csvfile)
-
-                            # Écriture de la première ligne avec 'plot' et les valeurs de 'liste_hauteurs'
                             csv_writer.writerow([session] + [plot] + [str(h) for h in liste_hauteurs])
 
-    # csv en ligne -> csv en colonne
-    with open(PATH + "/" + session + "/" + "hauteurs_l_opencv.csv", 'r') as csvfile_temp, open(PATH + "/" + session + "/" + "hauteurs_c_opencv.csv", 'w', newline='') as csvfile_final:
-        csv_reader = csv.reader(csvfile_temp)
-        csv_writer = csv.writer(csvfile_final)
-        data_transposed = list(zip(*csv_reader))
-        csv_writer.writerows(data_transposed)
-
+        # csv en ligne -> csv en colonne
+        with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'r') as csvfile_temp, open(csv_path, 'w', newline='') as csvfile_final:
+            csv_reader = csv.reader(csvfile_temp)
+            csv_writer = csv.writer(csvfile_final)
+            data_transposed = list(zip(*csv_reader))
+            csv_writer.writerows(data_transposed)
