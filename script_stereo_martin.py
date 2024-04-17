@@ -6,6 +6,7 @@ import cv2 as cv
 from matplotlib import pyplot as plt
 import scipy.ndimage as ndi
 import csv
+from itertools import zip_longest
 
 
 def raccourcir_image(image):
@@ -395,6 +396,6 @@ for session in sorted(sessionlist):
 with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'r') as csvfile_temp, open(csv_path, 'w', newline='') as csvfile_final:
     csv_reader = csv.reader(csvfile_temp)
     csv_writer = csv.writer(csvfile_final)
-    data_transposed = list(zip(*csv_reader))
+    data_transposed = list(zip_longest(*csv_reader, fillvalue=None))
     csv_writer.writerows(data_transposed)
 os.remove(os.path.basename(csv_path).replace(".csv", "_temporary.csv"))
