@@ -333,36 +333,45 @@ def hauteur_locale(matrice, nombre_zones):
     # Taille des zones représentant n% de la matrice
     coeff = 1/math.sqrt(nombre_zones)
     zone_size = (int(matrice.shape[0] * coeff), int(matrice.shape[1] * coeff))
-    # Calculer le nombre total de zones dans la matrice
 
     # Initialiser les listes pour stocker les résultats
     max_locals = []
     sol_locaux = []
     hauteur = []
     mat_sans_nan = matrice[~np.isnan(matrice)]
-    sol_bac = np.median(np.sort(mat_sans_nan.flatten())[::-1][:int(mat_sans_nan.size * 0.02)])
+    sol_bac = - np.median(np.sort(mat_sans_nan.flatten())[::-1][:int(mat_sans_nan.size * 0.02)])
+    mat_hauteur = -1 * matrice.copy()
 
     # Parcourir chaque zone
     for i in range(0, matrice.shape[0], zone_size[0]):
         for j in range(0, matrice.shape[1], zone_size[1]):
             # Extraire la zone actuelle
-            zone = matrice[i:i + zone_size[0], j:j + zone_size[1]]
+            zone = mat_hauteur[i:i + zone_size[0], j:j + zone_size[1]]
 
             # Calculer max_local et sol_local pour la zone
             zone_sans_nan = zone[~np.isnan(zone)]
-            max_local = np.median(np.sort(zone_sans_nan.flatten())[:int(zone_sans_nan.size * 0.05)])
-            sol_local = np.median(np.sort(zone_sans_nan.flatten())[::-1][:int(zone_sans_nan.size * 0.1)])
+            sol_local = np.median(np.sort(zone_sans_nan.flatten())[:int(zone_sans_nan.size * 0.1)])
+            sol_locaux.append(sol_local)
 
+            # Ramener le sol à zero
+            if sol_bac - 50 <= sol_local <= sol_bac + 50:
+                zone -= sol_local
+            else:
+                zone -= sol_bac
+
+            zone = mat_hauteur[i:i + zone_size[0], j:j + zone_size[1]]
+            zone_sans_nan = zone[~np.isnan(zone)]
             if zone.shape[0]*zone.shape[1] <= 0.5 * zone_size[0]*zone_size[1]:
                 hauteur.append(np.nan)
             else:
-                # Ajouter les résultats à la liste
+                max_local = np.median(np.sort(zone_sans_nan.flatten())[::-1][:int(zone_sans_nan.size * 0.05)])
                 max_locals.append(max_local)
-                sol_locaux.append(sol_local)
-                if sol_bac - 50 <= sol_local <= sol_bac + 50:
-                    hauteur.append(sol_local - max_local)
+                if max_local > 100:
+                    # Ajouter les résultats à la liste
+                    hauteur.append(max_local)
                 else:
-                    hauteur.append(sol_bac - max_local)
+                    hauteur.append(np.nan)
+    # plt.figure() and plt.imshow(mat_hauteur)
 
     # Convertir les listes en tableaux numpy
     max_locals = np.array(max_locals)
@@ -370,20 +379,20 @@ def hauteur_locale(matrice, nombre_zones):
     hauteur_a = np.array(hauteur)
     hauteur = hauteur_a[~np.isnan(hauteur_a)]
 
-    mat_hauteur = matrice.copy()  # Copie de mat_filtree pour ne pas modifier l'original
+    mat_zones_hauteur = np.zeros_like(matrice)
     index = 0
-    for i in range(0, mat_hauteur.shape[0], zone_size[0]):
-        for j in range(0, mat_hauteur.shape[1], zone_size[1]):
+    for i in range(0, mat_zones_hauteur.shape[0], zone_size[0]):
+        for j in range(0, mat_zones_hauteur.shape[1], zone_size[1]):
             # Assigner la valeur de hauteur correspondante à chaque point de la zone
-            mat_hauteur[i:i + zone_size[0], j:j + zone_size[1]] = hauteur_a[index]
+            mat_zones_hauteur[i:i + zone_size[0], j:j + zone_size[1]] = hauteur_a[index]
             index += 1
-
-    return hauteur, mat_hauteur
+    plt.figure() and plt.imshow(mat_zones_hauteur)
+    return hauteur, mat_zones_hauteur
 
 
 # PATH
 PATH = "/home/loeb/Documents/Comparaison_mesures (copie)"
-n_zones = 100
+n_zones = 49
 print('nombre de zones =', n_zones)
 csv_path = PATH + "/" + "hauteurs_opencv" + str(n_zones) + ".csv"
 sessionlist = os.listdir(PATH)
