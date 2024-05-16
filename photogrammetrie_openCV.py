@@ -326,6 +326,9 @@ def filtre_points_aberrants(matrice):
         # Mettre à jour la matrice filtrée
         matrice_filtree = nouvelle_matrice_filtree
 
+    # Filtrer les points les plus hauts
+    matrice_filtree[(matrice_filtree < np.median(np.sort(matrice_filtree.flatten())[:int(matrice_filtree.size * 0.0005)]))] = np.nan
+
     return matrice_filtree
 
 
@@ -339,7 +342,8 @@ def hauteur_locale(matrice, nombre_zones):
     sol_locaux = []
     hauteur = []
     mat_sans_nan = matrice[~np.isnan(matrice)]
-    sol_bac = - np.median(np.sort(mat_sans_nan.flatten())[::-1][:int(mat_sans_nan.size * 0.02)])
+    sol_bac = - np.median(np.sort(mat_sans_nan.flatten())[::-1][:int(mat_sans_nan.size * 0.03)])
+    max_glob = abs(sol_bac + np.median(np.sort(mat_sans_nan.flatten())[:int(mat_sans_nan.size * 0.02)]))
     mat_hauteur = -1 * matrice.copy()
 
     # Parcourir chaque zone
@@ -350,23 +354,26 @@ def hauteur_locale(matrice, nombre_zones):
 
             # Calculer max_local et sol_local pour la zone
             zone_sans_nan = zone[~np.isnan(zone)]
-            sol_local = np.median(np.sort(zone_sans_nan.flatten())[:int(zone_sans_nan.size * 0.1)])
+            sol_local = np.median(np.sort(zone_sans_nan.flatten())[:int(zone_sans_nan.size * 0.03)])
             sol_locaux.append(sol_local)
 
             # Ramener le sol à zero
-            if sol_bac - 50 <= sol_local <= sol_bac + 50:
+            if sol_bac - 100 <= sol_local <= sol_bac + 50:
                 zone -= sol_local
+                #print('new_sol')
             else:
                 zone -= sol_bac
+                #print('sol_bac')
 
             zone = mat_hauteur[i:i + zone_size[0], j:j + zone_size[1]]
             zone_sans_nan = zone[~np.isnan(zone)]
             if zone.shape[0]*zone.shape[1] <= 0.5 * zone_size[0]*zone_size[1]:
                 hauteur.append(np.nan)
             else:
-                max_local = np.median(np.sort(zone_sans_nan.flatten())[::-1][:int(zone_sans_nan.size * 0.05)])
+                mean_local = np.mean(zone_sans_nan.flatten())
+                max_local = np.median(np.sort(zone_sans_nan.flatten())[::-1][:int(zone_sans_nan.size * 0.03)])
                 max_locals.append(max_local)
-                if max_local > 100:
+                if mean_local > max_glob/4 and max_local > max_glob/3:
                     # Ajouter les résultats à la liste
                     hauteur.append(max_local)
                 else:
@@ -386,13 +393,13 @@ def hauteur_locale(matrice, nombre_zones):
             # Assigner la valeur de hauteur correspondante à chaque point de la zone
             mat_zones_hauteur[i:i + zone_size[0], j:j + zone_size[1]] = hauteur_a[index]
             index += 1
-    plt.figure() and plt.imshow(mat_zones_hauteur)
+    # plt.figure() and plt.imshow(mat_zones_hauteur)
     return hauteur, mat_zones_hauteur
 
 
 # PATH
 PATH = "/home/loeb/Documents/Comparaison_mesures (copie)"
-n_zones = 49
+n_zones = 225
 print('nombre de zones =', n_zones)
 csv_path = PATH + "/" + "hauteurs_opencv" + str(n_zones) + ".csv"
 sessionlist = os.listdir(PATH)
@@ -421,7 +428,7 @@ for session in tqdm(sorted(sessionlist)):
 
                         # carte de profondeur, avec suppression du capteur
                         depth_image = carte_profondeur(image_left, image_right)
-                        # plt.figure() and plt.imshow(depth_image, cmap='jet', vmin=800, vmax=1500)
+                        # plt.figure() and plt.imshow(depth_image, cmap='jet', vmin=1000, vmax=2000)
 
                         # Extraire la region du bac
                         haut, bas, gauche, droite = contour_bac(image_left, image_right)
@@ -435,6 +442,7 @@ for session in tqdm(sorted(sessionlist)):
                         # Filtre des points aberrants
                         # plt.figure() and plt.imshow(image_cut[haut:bas, gauche:droite], cmap='jet', vmin=500, vmax=2000)
                         mat_filtree = filtre_points_aberrants(image_cut[haut:bas, gauche:droite])
+                        plt.figure() and plt.imshow(mat_filtree)
 
                         '''
                         # Exporter z_map vers dosier mask_z_map
@@ -447,7 +455,15 @@ for session in tqdm(sorted(sessionlist)):
                         # Calcul des hauteurs locales
                         liste_hauteurs, z_mat = hauteur_locale(mat_filtree, n_zones)
                         print(liste_hauteurs)
-                        plt.figure() and plt.imshow(z_mat, cmap='jet', vmin=0, vmax=1000)
+                        plt.figure() and plt.imshow(z_mat)
+
+                        # Stats hauteurs locales
+                        hauteur_moyenne = np.mean(liste_hauteurs)
+                        hauteur_mediane = np.median(liste_hauteurs)
+                        hauteur_min = np.min(liste_hauteurs)
+                        hauteur_max = np.max(liste_hauteurs)
+                        variance_hauteur = np.var(liste_hauteurs)
+                        ecartype_hauteur = np.std(variance_hauteur)
 
                         # Export des hauteurs locales en csv
                         with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'a', newline='') as csvfile:
