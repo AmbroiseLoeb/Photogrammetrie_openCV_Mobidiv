@@ -230,7 +230,7 @@ def carte_profondeur(image1, image2):
     # definition des parametres de disparite
     Dmax = 100 * 1000
     Dmin = .5 * 1000
-    blockSize = 5
+    blockSize = 10
     MinDisp = int(np.floor(FL * B / Dmax))
     MaxDisp = int(np.ceil(FL * B / Dmin))
     numDisparities = MaxDisp - MinDisp
@@ -258,7 +258,7 @@ def carte_profondeur(image1, image2):
     # configuration de StereoSGBM (Stereo Semi-Global Block Matching ?)
     stereo = cv.StereoSGBM.create(minDisparity=round(min_disp / isubsampling),
                                   numDisparities=round(numDisparities / isubsampling),
-                                  blockSize=5,
+                                  blockSize=10,
                                   uniquenessRatio=1,
                                   # preFilterCap=50,
                                   # disp12MaxDiff=10,
@@ -274,10 +274,8 @@ def carte_profondeur(image1, image2):
     disparity = cv.resize(disparity * isubsampling, (w_ori, h_ori), interpolation=cv.INTER_AREA)
 
     # affichage de la carte de disparite
-    '''
-    plt.figure() and plt.imshow(disparity, cmap='jet', vmin=np.nanquantile(disparity, 0.005), 
-                                vmax=np.nanquantile(disparity, 0.995))
-    '''
+    # plt.figure() and plt.imshow(disparity, cmap='jet', vmin=np.nanquantile(disparity, 0.005), vmax=np.nanquantile(disparity, 0.995)) and plt.colorbar()
+
 
     # calcul de la carte de profondeur
     xyz_image = cv.reprojectImageTo3D(disparity, Q)
@@ -326,7 +324,7 @@ def filtre_points_aberrants(matrice):
         # Mettre à jour la matrice filtrée
         matrice_filtree = nouvelle_matrice_filtree
 
-    # Filtrer les points les plus hauts
+    # Re-filtrer les points les plus hauts
     matrice_filtree[(matrice_filtree < np.median(np.sort(matrice_filtree.flatten())[:int(matrice_filtree.size * 0.0005)]))] = np.nan
 
     return matrice_filtree
@@ -398,8 +396,9 @@ def hauteur_locale(matrice, nombre_zones):
 
 
 # PATH
-PATH = "/home/loeb/Documents/Comparaison_mesures (copie)"
-n_zones = 225
+PATH = "/home/loeb/Documents/Comparaison_mesures"
+#PATH = "/home/loeb/Documents/Literal_mobidiv_2023"
+n_zones = 100
 print('nombre de zones =', n_zones)
 csv_path = PATH + "/" + "hauteurs_opencv" + str(n_zones) + ".csv"
 sessionlist = os.listdir(PATH)
@@ -407,9 +406,6 @@ for session in tqdm(sorted(sessionlist)):
     if session.find("Session") == 0:
         print(session)
         plotlist = os.listdir(PATH + "/" + session)
-        if not os.path.exists(PATH + "/" + session + "/" + "mask_z_map"):
-            # Crée le fichier s'il n'existe pas
-            os.makedirs(PATH + "/" + session + "/" + "mask_z_map")
         for plot in tqdm(sorted(plotlist)):
             if plot.find("uplot") == 0:
                 print(plot)
@@ -425,37 +421,31 @@ for session in tqdm(sorted(sessionlist)):
                         image_left = cv.imread(left_path)
                         image_right = cv.imread(right_path)
                         # plt.figure() and plt.imshow(image_left)
+                        # plt.figure() and plt.imshow(image_right)
 
                         # carte de profondeur, avec suppression du capteur
                         depth_image = carte_profondeur(image_left, image_right)
-                        # plt.figure() and plt.imshow(depth_image, cmap='jet', vmin=1000, vmax=2000)
+                        # plt.figure() and plt.imshow(depth_image, cmap='jet', vmin=1200, vmax=2000) and plt.colorbar()
 
                         # Extraire la region du bac
                         haut, bas, gauche, droite = contour_bac(image_left, image_right)
                         image_cut = np.zeros_like(depth_image, dtype='float32')
                         image_cut[haut:bas, gauche:droite] = depth_image[haut:bas, gauche:droite]
                         # image_cut = depth_image[haut:bas, gauche:droite]
-                        # plt.figure() and plt.imshow(image_cut, cmap='jet', vmin=800, vmax=2000)
+                        # plt.figure() and plt.imshow(image_cut, cmap='jet', vmin=1200, vmax=1900)
 
                         print(file)
 
                         # Filtre des points aberrants
-                        # plt.figure() and plt.imshow(image_cut[haut:bas, gauche:droite], cmap='jet', vmin=500, vmax=2000)
+                        #plt.figure() and plt.imshow(image_cut[haut:bas, gauche:droite], cmap='jet', vmin=1200, vmax=1900) and plt.colorbar()
                         mat_filtree = filtre_points_aberrants(image_cut[haut:bas, gauche:droite])
-                        plt.figure() and plt.imshow(mat_filtree)
+                        #plt.figure() and plt.imshow(mat_filtree, cmap='jet', vmin=1200, vmax=1900) and plt.colorbar()
 
-                        '''
-                        # Exporter z_map vers dosier mask_z_map
-                        plt.figure() and plt.imshow(mat_filtree, cmap='jet', vmin=800, vmax=2000)
-                        plt.savefig(PATH + "/" + session + "/mask_z_map/" +
-                                    os.path.basename(file).replace("camera_1_2_RGB", plot + "_z_map"), dpi='figure')
-                        plt.close()
-                        '''
 
                         # Calcul des hauteurs locales
                         liste_hauteurs, z_mat = hauteur_locale(mat_filtree, n_zones)
                         print(liste_hauteurs)
-                        plt.figure() and plt.imshow(z_mat)
+                        # plt.figure() and plt.imshow(z_mat) and plt.colorbar()
 
                         # Stats hauteurs locales
                         hauteur_moyenne = np.mean(liste_hauteurs)
@@ -463,7 +453,7 @@ for session in tqdm(sorted(sessionlist)):
                         hauteur_min = np.min(liste_hauteurs)
                         hauteur_max = np.max(liste_hauteurs)
                         variance_hauteur = np.var(liste_hauteurs)
-                        ecartype_hauteur = np.std(variance_hauteur)
+                        ecartype_hauteur = np.std(liste_hauteurs)
 
                         # Export des hauteurs locales en csv
                         with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'a', newline='') as csvfile:
