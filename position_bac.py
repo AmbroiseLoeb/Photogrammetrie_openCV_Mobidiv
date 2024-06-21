@@ -161,13 +161,17 @@ def contour_bac(image1, image2, seuil_small_obj=300):
     centre_ligne = height // 2
 
     # charger les contours de bac des images 1 et 2
-    haut_left, bas_left, gauche_left, droite_left = bord_bac(image1, seuil_small_obj)
-    haut_right, bas_right, gauche_right, droite_right = bord_bac(image2, seuil_small_obj)
+    haut_1, bas_1, gauche_1, droite_1 = bord_bac(image1, seuil_small_obj)
+    haut_2, bas_2, gauche_2, droite_2 = bord_bac(image2, seuil_small_obj)
 
-    h = min(haut_left, haut_right)
-    b = max(bas_left, bas_right)
-    g = min(gauche_left, gauche_right)
-    d = max(droite_left, droite_right)
+    # afficher les contours du bac des images 1 et 2 (en rouge)
+    cv.rectangle(image1, (gauche_1, haut_1), (droite_1, bas_1), (0, 0, 255), 20)
+    cv.rectangle(image2, (gauche_2, haut_2), (droite_2, bas_2), (0, 0, 255), 20)
+
+    h = min(haut_1, haut_2)
+    b = max(bas_1, bas_2)
+    g = min(gauche_1, gauche_2)
+    d = max(droite_1, droite_2)
 
     # Ajouter un bord manquant
 
@@ -182,4 +186,4 @@ def contour_bac(image1, image2, seuil_small_obj=300):
         else:
             d = min(d, int(g + 0.8 * (b - h)))
 
-    return h, b, g, d
+    return h, b, g, d, image1, image2

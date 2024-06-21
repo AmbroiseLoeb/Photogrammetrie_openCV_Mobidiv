@@ -101,12 +101,9 @@ def hauteur_par_zone(matrice_h, nombre_zones):
                     hauteurs.append(max_local)
                 else:
                     hauteurs.append(np.nan)
-    # plt.figure() and plt.imshow(mat_hauteur)
 
-    # Convertir les listes en tableaux numpy
-    hauteur_a = np.array(hauteurs)
-    hauteur = hauteur_a[~np.isnan(hauteur_a)]
-
+    # Representation graphique des hauteurs par zone
+    hauteur_a = np.array([int(round(h)) if not math.isnan(h) else np.nan for h in hauteurs])
     mat_zones_hauteur = np.zeros_like(matrice_h)
     index = 0
     for i in range(0, mat_zones_hauteur.shape[0], zone_size[0]):
@@ -114,6 +111,27 @@ def hauteur_par_zone(matrice_h, nombre_zones):
             # Assigner la valeur de hauteur correspondante à chaque point de la zone
             mat_zones_hauteur[i:i + zone_size[0], j:j + zone_size[1]] = hauteur_a[index]
             index += 1
-    # plt.figure() and plt.imshow(mat_zones_hauteur)
 
-    return hauteurs, mat_zones_hauteur
+    # Création de la figure et de l'axe
+    plt.ioff()  # desactive l'affichage automatique
+    figure_hauteurs, ax = plt.subplots()
+    cax = ax.imshow(mat_zones_hauteur, cmap='viridis', interpolation='none')
+    figure_hauteurs.colorbar(cax, ax=ax, label='Hauteur (mm)')
+    plt.axis('off')  # Désactiver les axes
+
+    # Ajouter les valeurs numériques sur la partie supérieure de chaque zone
+    index = 0
+    numero_z = 1
+    for i in range(0, mat_zones_hauteur.shape[0], zone_size[0]):
+        for j in range(0, mat_zones_hauteur.shape[1], zone_size[1]):
+            if not np.isnan(hauteur_a[index]):
+                ax.text(j + zone_size[1] / 2, i + zone_size[0] / 2 - zone_size[0] / 4, f"{int(hauteur_a[index]):3d}", color='white', ha='center', va='center', fontsize=7)
+                ax.text(j + zone_size[1] / 10, i + zone_size[0] * 0.9, f"{numero_z}", color='red', ha='left', va='bottom', fontsize=4)
+                numero_z += 1
+            index += 1
+
+    ax.set_title(f'Hauteurs maximale du couvert par zone ({nombre_zones})')
+
+    # Retourner l'objet figure
+    return hauteurs, mat_zones_hauteur, figure_hauteurs
+
