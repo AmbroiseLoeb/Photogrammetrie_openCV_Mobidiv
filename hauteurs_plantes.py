@@ -47,6 +47,7 @@ def carte_hauteur_absolue(matrice, nombre_zones):
 
     # Initialiser les listes pour stocker les résultats
     sol_locaux = []
+
     mat_sans_nan = matrice[~np.isnan(matrice)]
     sol_bac = - np.median(np.sort(mat_sans_nan.flatten())[::-1][:int(mat_sans_nan.size * 0.03)])
     mat_hauteur = -1 * matrice.copy()
@@ -82,7 +83,7 @@ def hauteur_par_zone(matrice_h, nombre_zones):
     max_locals = []
     hauteurs = []
     mat_sans_nan = matrice_h[~np.isnan(matrice_h)]
-    max_glob = np.median(np.sort(mat_sans_nan.flatten())[::-1][:int(mat_sans_nan.size * 0.03)])
+    max_glob = np.median(np.sort(mat_sans_nan.flatten())[::-1][:int(mat_sans_nan.size * 0.02)])
 
     for i in range(0, matrice_h.shape[0], zone_size[0]):
         for j in range(0, matrice_h.shape[1], zone_size[1]):
@@ -91,7 +92,7 @@ def hauteur_par_zone(matrice_h, nombre_zones):
 
             zone_sans_nan = zone[~np.isnan(zone)]
             if zone.shape[0]*zone.shape[1] <= 0.5 * zone_size[0]*zone_size[1]:
-                hauteurs.append(np.nan)
+                hauteurs.append(np.inf)
             else:
                 mean_local = np.mean(zone_sans_nan.flatten())
                 max_local = np.median(np.sort(zone_sans_nan.flatten())[::-1][:int(zone_sans_nan.size * 0.03)])
@@ -103,7 +104,7 @@ def hauteur_par_zone(matrice_h, nombre_zones):
                     hauteurs.append(np.nan)
 
     # Representation graphique des hauteurs par zone
-    hauteur_a = np.array([int(round(h)) if not math.isnan(h) else np.nan for h in hauteurs])
+    hauteur_a = np.array([int(round(h)) if not math.isinf(h) and not math.isnan(h) else (np.inf if math.isinf(h) else np.nan) for h in hauteurs])
     mat_zones_hauteur = np.zeros_like(matrice_h)
     index = 0
     for i in range(0, mat_zones_hauteur.shape[0], zone_size[0]):
@@ -124,10 +125,11 @@ def hauteur_par_zone(matrice_h, nombre_zones):
     numero_z = 1
     for i in range(0, mat_zones_hauteur.shape[0], zone_size[0]):
         for j in range(0, mat_zones_hauteur.shape[1], zone_size[1]):
-            if not np.isnan(hauteur_a[index]):
-                ax.text(j + zone_size[1] / 2, i + zone_size[0] / 2 - zone_size[0] / 4, f"{int(hauteur_a[index]):3d}", color='white', ha='center', va='center', fontsize=7)
+            if not np.isinf(hauteur_a[index]):
                 ax.text(j + zone_size[1] / 10, i + zone_size[0] * 0.9, f"{numero_z}", color='red', ha='left', va='bottom', fontsize=4)
                 numero_z += 1
+                if not np.isnan(hauteur_a[index]):
+                    ax.text(j + zone_size[1] / 2, i + zone_size[0] / 2 - zone_size[0] / 4, f"{int(hauteur_a[index]):3d}", color='white', ha='center', va='center', fontsize=7)
             index += 1
 
     ax.set_title(f'Hauteurs maximale du couvert par zone ({nombre_zones})')

@@ -95,27 +95,26 @@ def traiter_dossier_plot(plot_path, session_name):
             hauteur_max = np.nanmax(liste_hauteurs)
             variance_hauteur = np.nanvar(liste_hauteurs)
             ecartype_hauteur = np.nanstd(liste_hauteurs)
-            print(hauteur_moyenne, hauteur_mediane, hauteur_min, hauteur_max, variance_hauteur, ecartype_hauteur)
+            # print(hauteur_moyenne, hauteur_mediane, hauteur_min, hauteur_max, variance_hauteur, ecartype_hauteur)
 
             # Enregistrement des fichiers
             sauvegarder_image(image_left_bac, plot_path, file.replace('RGB', 'bac'))
             sauvegarder_image(image_left_bac, plot_path, file.replace('camera_1', 'camera_2').replace('RGB', 'bac'))
-            sauvegarder_image(figure_h, plot_path, 'grille_hauteur.jpg')
+            sauvegarder_image(figure_h, plot_path, f"grille_hauteur_{folder_name}_{n_zones}z.jpg")
 
             # Export des hauteurs locales en csv
             with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'a', newline='') as csvfile:
                 csv_writer = csv.writer(csvfile)
-                csv_writer.writerow([session_name] + [os.path.basename(plot_path)] + [str(h) for h in liste_hauteurs if
-                                                                                      not math.isnan(h)])
+                csv_writer.writerow([session_name] + [os.path.basename(plot_path)] + [str(h) for h in liste_hauteurs if not math.isinf(h)])
 
 
 def main():
-    global n_zones, csv_path, seuil_small_obj
+    global n_zones, csv_path, seuil_small_obj, folder_name
 
     # Interface utilisateur pour sélectionner un dossier
     root = tk.Tk()
     root.withdraw()
-    PATH = filedialog.askdirectory(initialdir="/home/loeb/Documents", title="Sélectionnez un dossier")
+    selected_path = filedialog.askdirectory(initialdir="/home/loeb/Documents", title="Sélectionnez un dossier")
 
     # Interface pour sélectionner le nombre de zones
     n_zones = simpledialog.askinteger("Nombre de zones", "Veuillez choisir un nombre de zones : \n (correspond au maillage utilisé lors de la reconnaissance du sol et des maximas locaux)", initialvalue=100, minvalue=1)
@@ -125,21 +124,22 @@ def main():
     seuil_small_obj = simpledialog.askinteger("Seuil petis objets", "Veuillez choisir une taille limite : \n (choisisser une taille plus grande lors des premiers stades de croissance)", initialvalue=300, minvalue=50)
     print('seuil du filtre des petits objets =', seuil_small_obj, 'pixels')
 
-    if PATH:
-        csv_path = os.path.join(PATH, "hauteurs_opencv" + str(n_zones) + ".csv")
+    if selected_path:
+        folder_name = os.path.basename(selected_path)
+        csv_path = os.path.join(selected_path, f"hauteurs_opencv_{folder_name}_{n_zones}z.csv")
         with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'a', newline='') as csvfile:
             csv_writer = csv.writer(csvfile)
             csv_writer.writerow([' '] + ['n° zone'] + [n for n in range(1, n_zones + 1)])
 
-        if "uplot" in os.path.basename(PATH):
+        if "uplot" in os.path.basename(selected_path):
             print("Dossier plot sélectionné")
-            traiter_dossier_plot(PATH, "N/A")
-        elif "Session" in os.path.basename(PATH):
+            traiter_dossier_plot(selected_path, "N/A")
+        elif "Session" in os.path.basename(selected_path):
             print("Dossier session sélectionné")
-            traiter_dossier_session(PATH)
+            traiter_dossier_session(selected_path)
         else:
             print("Dossier racine sélectionné")
-            traiter_dossier_racine(PATH)
+            traiter_dossier_racine(selected_path)
 
     # csv en ligne -> csv en colonne
     with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'r') as csvfile_temp, open(csv_path, 'w',
