@@ -3,6 +3,9 @@ import carte_profondeur
 import position_bac
 import hauteurs_plantes
 from pathlib import Path
+import tkinter as tk
+from tkinter import filedialog, simpledialog
+# import PySimpleGUI as sg
 import os
 import math
 import numpy as np
@@ -41,76 +44,106 @@ def sauvegarder_image(image, path_dossier, nom_fichier):
         cv.imwrite(chemin_complet, image_np)
 
 
-def main():
-    n_plot = 0
-    # PATH
-    PATH = "/home/loeb/Documents/Comparaison_mesures"
-    #PATH = "/home/loeb/Documents/Literal_mobidiv_2023"
-    n_zones = 10**2
-    print('nombre de zones =', n_zones)
-    csv_path = PATH + "/" + "hauteurs_opencv" + str(n_zones) + ".csv"
-    sessionlist = os.listdir(PATH)
+def traiter_dossier_racine(racine_path):
+    sessionlist = os.listdir(racine_path)
     for session in tqdm(sorted(sessionlist)):
         if session.find("Session") == 0:
             print(session)
-            plotlist = os.listdir(PATH + "/" + session)
-            for plot in tqdm(sorted(plotlist)):
-                if plot.find("uplot_7_1") == 0:
-                    print(plot)
-                    imglist = os.listdir(PATH + "/" + session + "/" + plot)
-                    for file in imglist:
-                        if "_camera_1_2_RGB.jpg" in file:
-                            print(file)
-
-                            # chargement des images gauche et droite
-                            left_path = (PATH + "/" + session + "/" + plot + "/" + file)
-                            id_image = left_path.split('camera_1')
-                            right_path = 'camera_2'.join(id_image)
-                            image_left = cv.imread(left_path)
-                            image_right = cv.imread(right_path)
-
-                            # carte de profondeur, avec suppression du capteur
-                            depth_image = carte_profondeur.workflow_carte_profondeur(image_left, image_right)
-
-                            # Extraire la region du bac
-                            haut, bas, gauche, droite, image_left_bac, image_right_bac = position_bac.contour_bac(image_left, image_right)
-                            image_cut = depth_image[haut:bas, gauche:droite]
-
-                            # Filtre des points aberrants
-                            mat_filtree = hauteurs_plantes.filtre_points_aberrants(image_cut)
-
-                            # Calcul des hauteurs locales
-                            carte_hauteur, profondeur_sol = hauteurs_plantes.carte_hauteur_absolue(mat_filtree, n_zones)
-                            liste_hauteurs, grille_h, figure_h = hauteurs_plantes.hauteur_par_zone(carte_hauteur, n_zones)
-                            print(liste_hauteurs)
-
-                            # Stats hauteurs locales
-                            hauteur_moyenne = np.nanmean(liste_hauteurs)
-                            hauteur_mediane = np.nanmedian(liste_hauteurs)
-                            hauteur_min = np.nanmin(liste_hauteurs)
-                            hauteur_max = np.nanmax(liste_hauteurs)
-                            variance_hauteur = np.nanvar(liste_hauteurs)
-                            ecartype_hauteur = np.nanstd(liste_hauteurs)
-                            print(hauteur_moyenne, hauteur_mediane, hauteur_min, hauteur_max, variance_hauteur, ecartype_hauteur)
+            traiter_dossier_session(os.path.join(racine_path, session))
 
 
-                            # Enregistrement des fichiers
-                            sauvegarder_image(image_left_bac, PATH + "/" + session + "/" + plot, file.replace('RGB', 'bac'))
-                            sauvegarder_image(image_left_bac, PATH + "/" + session + "/" + plot, file.replace('camera_1', 'camera_2').replace('RGB', 'bac'))
-                            sauvegarder_image(figure_h, PATH + "/" + session + "/" + plot, 'grille_hauteur.jpg')
+def traiter_dossier_session(session_path):
+    plotlist = os.listdir(session_path)
+    for plot in tqdm(sorted(plotlist)):
+        if plot.find("uplot") == 0:
+            print(plot)
+            traiter_dossier_plot(os.path.join(session_path, plot), os.path.basename(session_path))
 
 
+def traiter_dossier_plot(plot_path, session_name):
+    imglist = os.listdir(plot_path)
+    for file in imglist:
+        if "_camera_1_2_RGB.jpg" in file:
+            print(file)
 
-                            # Export des hauteurs locales en csv
-                            with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'a', newline='') as csvfile:
-                                csv_writer = csv.writer(csvfile)
-                                if n_plot == 0:
-                                    csv_writer.writerow([' '] + ['n° zone'] + [n for n in range(1, n_zones + 1)])
-                                    n_plot += 1
-                                csv_writer.writerow([session] + [plot] + [str(h) for h in liste_hauteurs if not math.isnan(h)])
+            # chargement des images gauche et droite
+            left_path = (plot_path + "/" + file)
+            id_image = left_path.split('camera_1')
+            right_path = 'camera_2'.join(id_image)
+            image_left = cv.imread(left_path)
+            image_right = cv.imread(right_path)
+
+            # carte de profondeur, avec suppression du capteur
+            depth_image = carte_profondeur.workflow_carte_profondeur(image_left, image_right)
+
+            # Extraire la region du bac
+            haut, bas, gauche, droite, image_left_bac, image_right_bac = position_bac.contour_bac(image_left, image_right, seuil_small_obj)
+            image_cut = depth_image[haut:bas, gauche:droite]
+
+            # Filtre des points aberrants
+            mat_filtree = hauteurs_plantes.filtre_points_aberrants(image_cut)
+
+            # Calcul des hauteurs locales
+            carte_hauteur, profondeur_sol = hauteurs_plantes.carte_hauteur_absolue(mat_filtree, n_zones)
+            liste_hauteurs, grille_h, figure_h = hauteurs_plantes.hauteur_par_zone(carte_hauteur, n_zones)
+            print(liste_hauteurs)
+
+            # Stats hauteurs locales
+            hauteur_moyenne = np.nanmean(liste_hauteurs)
+            hauteur_mediane = np.nanmedian(liste_hauteurs)
+            hauteur_min = np.nanmin(liste_hauteurs)
+            hauteur_max = np.nanmax(liste_hauteurs)
+            variance_hauteur = np.nanvar(liste_hauteurs)
+            ecartype_hauteur = np.nanstd(liste_hauteurs)
+            print(hauteur_moyenne, hauteur_mediane, hauteur_min, hauteur_max, variance_hauteur, ecartype_hauteur)
+
+            # Enregistrement des fichiers
+            sauvegarder_image(image_left_bac, plot_path, file.replace('RGB', 'bac'))
+            sauvegarder_image(image_left_bac, plot_path, file.replace('camera_1', 'camera_2').replace('RGB', 'bac'))
+            sauvegarder_image(figure_h, plot_path, 'grille_hauteur.jpg')
+
+            # Export des hauteurs locales en csv
+            with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'a', newline='') as csvfile:
+                csv_writer = csv.writer(csvfile)
+                csv_writer.writerow([session_name] + [os.path.basename(plot_path)] + [str(h) for h in liste_hauteurs if
+                                                                                      not math.isnan(h)])
+
+
+def main():
+    global n_zones, csv_path, seuil_small_obj
+
+    # Interface utilisateur pour sélectionner un dossier
+    root = tk.Tk()
+    root.withdraw()
+    PATH = filedialog.askdirectory(initialdir="/home/loeb/Documents", title="Sélectionnez un dossier")
+
+    # Interface pour sélectionner le nombre de zones
+    n_zones = simpledialog.askinteger("Nombre de zones", "Veuillez choisir un nombre de zones : \n (correspond au maillage utilisé lors de la reconnaissance du sol et des maximas locaux)", initialvalue=100, minvalue=1)
+    print('nombre de zones =', n_zones)
+
+    # Interface pour sélectionner le seuil du filtre des petits objets
+    seuil_small_obj = simpledialog.askinteger("Seuil petis objets", "Veuillez choisir une taille limite : \n (choisisser une taille plus grande lors des premiers stades de croissance)", initialvalue=300, minvalue=50)
+    print('seuil du filtre des petits objets =', seuil_small_obj, 'pixels')
+
+    if PATH:
+        csv_path = os.path.join(PATH, "hauteurs_opencv" + str(n_zones) + ".csv")
+        with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'a', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow([' '] + ['n° zone'] + [n for n in range(1, n_zones + 1)])
+
+        if "uplot" in os.path.basename(PATH):
+            print("Dossier plot sélectionné")
+            traiter_dossier_plot(PATH, "N/A")
+        elif "Session" in os.path.basename(PATH):
+            print("Dossier session sélectionné")
+            traiter_dossier_session(PATH)
+        else:
+            print("Dossier racine sélectionné")
+            traiter_dossier_racine(PATH)
 
     # csv en ligne -> csv en colonne
-    with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'r') as csvfile_temp, open(csv_path, 'w', newline='') as csvfile_final:
+    with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'r') as csvfile_temp, open(csv_path, 'w',
+                                                                                                       newline='') as csvfile_final:
         csv_reader = csv.reader(csvfile_temp)
         csv_writer = csv.writer(csvfile_final)
         data_transposed = list(zip_longest(*csv_reader, fillvalue=None))
@@ -121,9 +154,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-
-#plt.ion()  # active l'affichage automatique
+# plt.ion()  # active l'affichage automatique
 # plt.figure() and plt.imshow(image_left)
 # plt.figure() and plt.imshow(image_right)
 # plt.figure() and plt.imshow(depth_image, cmap='jet', vmin=1200, vmax=2000) and plt.colorbar()
