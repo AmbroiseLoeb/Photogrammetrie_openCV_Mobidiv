@@ -50,15 +50,25 @@ Dans l'interface qui apparait, sélectionner au choix :
 **Choisir le nombre de zones :**
 
 Pour calculer localement les hauteur des plantes, la région du bac est découpée en zones de même taille.
-Le nombre de zone est par défault fixé à 100.
+Par défault, le nombre de zone est fixé à 100.
 Augmenter ce nombre permet une meilleure résolution et d'avantage de données de hauteur.
 Cependant, un nombre de zone trop important peut faire apparaitre des valeurs aberrantes.
- est préférable de choisir une puissance (81, 100, 169, 225...).
-
-
+Pour une répartition égale des zones, il est préférable de choisir une puissance (81, 100, 169, 225 etc.).
 
 
 **Choisir le seuil de filtre des petits objets :**
+
+Les petits objets (cailloux etc.) peuvent perturber la détection du bac.
+Il est nécessaire de filtrer ces derniers par leur taille.
+Par défault, la valeur du seuil est fixé à 300 (pixels).
+Il est souvent nécessaire d'augmenter cette valeur (ex : 2000, 5000) lorsque les plantes occupent peu de surface (notamment lors des premiers stades de croissance).
+
+**Outputs :**
+
+- csv comprenant la hauteur de chaque zone (dans le dossier sélectionné)
+- représentation graphique des hauteur de chaque zone (dans le dossier *plot*)
+- représentation graphique des contours du bac détecté sur chaque image (dans le dossier *plot*)
+
 
 
 ## Ressources utiles
@@ -66,4 +76,5 @@ Cependant, un nombre de zone trop important peut faire apparaitre des valeurs ab
 Suivi du projet : 
 https://aloeb.notion.site/Suivi-du-projet-482f379e883b4974b1b2b95aec96181d
 
-Projet Mobidiv : https://mobidiv.hub.inrae.fr/
+Projet Mobidiv :
+https://mobidiv.hub.inrae.fr/
