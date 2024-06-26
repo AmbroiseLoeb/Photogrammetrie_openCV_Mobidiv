@@ -1,11 +1,12 @@
-# Pipeline d’analyse d’image mesurant les traits architecturaux du couvert
+# Pipeline d’analyse d’image parphotogrammétrie
 
 ## Description
-Ce projet à pour objetctif de mesurer les hauteurs d'un couvert de plantes dans un contexte d'étude des mélanges variétaux de blé.
-Des bacs séparés permettent un nombre important de cultures différentes, pures ou en mélange.
+Ce projet à pour objetctif de mesurer les traits architecturaux de couverts végétaux dans un contexte d'étude des mélanges variétaux de blé.
+Différents génotypes sont cultivés dans des bacs séparés, en culture pure ou en mélange.
 Plusieurs dispositifs d'acqisition d'image, manuel ou automatique, permettent une collecte de données régulière à différents stades de croissance.
 
-Ce projet comporte deux méthodes, s'adaptant chacune à un dispositif d'aquisition. Ici, on se propose de traiter les images par photogrammétrie à l'aide notamment de la librairie Python openCV.
+Le projet comporte deux méthodes, s'adaptant chacune à un dispositif d'aquisition.
+Ici, on se propose de traiter les images par photogrammétrie à l'aide notamment de la librairie Python openCV.
 
 ## Installation
 
@@ -47,6 +48,14 @@ Dans l'interface qui apparait, sélectionner au choix :
 - dossier *racine* contenant plusieurs dossiers *Session*
 
 **Choisir le nombre de zones :**
+
+Pour calculer localement les hauteur des plantes, la région du bac est découpée en zones de même taille.
+Le nombre de zone est par défault fixé à 100.
+Augmenter ce nombre permet une meilleure résolution et d'avantage de données de hauteur.
+Cependant, un nombre de zone trop important peut faire apparaitre des valeurs aberrantes.
+ est préférable de choisir une puissance (81, 100, 169, 225...).
+
+
 
 
 **Choisir le seuil de filtre des petits objets :**
