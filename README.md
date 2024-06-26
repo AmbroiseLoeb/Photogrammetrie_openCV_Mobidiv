@@ -7,6 +7,31 @@ Plusieurs dispositifs d'acqisition d'image, manuel ou automatique, permettent un
 
 Ce projet comporte deux méthodes, s'adaptant chacune à un dispositif d'aquisition. Ici, on se propose de traiter les images par photogrammétrie à l'aide notamment de la librairie Python openCV.
 
+## Installation
+
+1. **Clonez le dépôt :**
+    ```bash
+    git clone https://github.com/aloeb-gh/Photogrammetrie_openCV_Mobidiv.git
+    ```
+
+2. **Accédez au répertoire du projet :**
+    ```bash
+    cd Photogrammetrie_openCV_Mobidiv
+    ```
+
+3. **Créez et activez un environnement virtuel :**
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+
+4. **Installez les dépendances :**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+
+
 ## Utilisation
 
 ## Ressources utiles
