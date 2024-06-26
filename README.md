@@ -34,9 +34,10 @@ Ce projet comporte deux méthodes, s'adaptant chacune à un dispositif d'aquisit
 
 ## Utilisation
 **Lancer le pipeline :**
-    ```bash
-    python3 photogrammetrie_openCV.py 
-    ```
+
+```bash
+python3 photogrammetrie_openCV.py 
+```
 
 **Selectionner votre dossier :**
 
