@@ -43,9 +43,9 @@ python3 photogrammetrie_openCV.py
 **Selectionner votre dossier :**
 
 Dans l'interface qui apparait, sélectionner au choix : 
-- dossier *plot* contenant les images à traiter
-- dossier *Session* contenant plusieurs dossiers *plot*
-- dossier *racine* contenant plusieurs dossiers *Session*
+- dossier *plot* contenant les images à traiter.
+- dossier *Session* contenant plusieurs dossiers *plot*.
+- dossier *racine* contenant plusieurs dossiers *Session*.
 
 **Choisir le nombre de zones :**
 
@@ -65,9 +65,9 @@ Il est souvent nécessaire d'augmenter cette valeur (ex : 2000, 5000) lorsque le
 
 **Outputs :**
 
-- csv comprenant la hauteur de chaque zone (dans le dossier sélectionné)
-- représentation graphique des hauteur de chaque zone (dans le dossier *plot*)
-- représentation graphique des contours du bac détecté sur chaque image (dans le dossier *plot*)
+- fichier .csv comprenant la hauteur de chaque zone (dans le dossier sélectionné).
+- représentation graphique des hauteur de chaque zone (dans le dossier *plot*).
+- représentation graphique des contours du bac détecté sur chaque image (dans le dossier *plot*).
 
 
 
