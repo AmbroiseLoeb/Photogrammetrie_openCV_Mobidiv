@@ -91,16 +91,6 @@ def traiter_dossier_plot(plot_path, session_name):
             liste_hauteurs, grille_h, figure_h = hauteurs_plantes.hauteur_par_zone(carte_hauteur, n_zones)
             print(liste_hauteurs)
 
-            # Stats hauteurs locales
-            hauteur_moyenne = np.nanmean(liste_hauteurs)
-            hauteur_mediane = np.nanmedian(liste_hauteurs)
-            hauteur_min = np.nanmin(liste_hauteurs)
-            hauteur_max = np.nanmax(liste_hauteurs)
-            variance_hauteur = np.nanvar(liste_hauteurs)
-            ecartype_hauteur = np.nanstd(liste_hauteurs)
-            print(f"hauteur_moyenne : {hauteur_moyenne}\nhauteur_mediane : {hauteur_mediane}\nhauteur_min : {hauteur_min}"
-                  f"\nhauteur_max : {hauteur_max}\nvariance_hauteur : {variance_hauteur}\necartype_hauteur : {ecartype_hauteur}")
-
             # Enregistrement des fichiers
             sauvegarder_image(image_left_bac, plot_path, file.replace('RGB', 'bac'))  # Contours du bac détectés sur l'image de gauche
             sauvegarder_image(image_left_bac, plot_path, file.replace('camera_1', 'camera_2').replace('RGB', 'bac'))  # Contours du bac détectés sur l'image de droite
