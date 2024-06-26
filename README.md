@@ -33,6 +33,24 @@ Ce projet comporte deux méthodes, s'adaptant chacune à un dispositif d'aquisit
 
 
 ## Utilisation
+**Lancer le pipeline :**
+
+    ```bash
+    python3 photogrammetrie_openCV.py 
+    ```
+
+**Selectionner votre dossier :**
+
+Dans l'interface qui apparait, sélectionner au choix : 
+- dossier *plot* contenant les images à traiter
+- dossier *Session* contenant plusieurs dossiers *plot*
+- dossier *racine* contenant plusieurs dossiers *Session*
+
+**Choisir le nombre de zones :**
+
+
+**Choisir le seuil de filtre des petits objets :**
+
 
 ## Ressources utiles
 
