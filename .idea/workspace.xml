@@ -1,31 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="d7d15656-b4bb-4291-b431-685b2e0d0eb2" name="Changes" comment="" />
+    <list default="true" id="d7d15656-b4bb-4291-b431-685b2e0d0eb2" name="Changes" comment="update hauteur min plante dans mat hauteur">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/stereo_imagerie.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/stereo_imagerie.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/carte_profondeur.py" beforeDir="false" afterPath="$PROJECT_DIR$/carte_profondeur.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hauteurs_plantes.py" beforeDir="false" afterPath="$PROJECT_DIR$/hauteurs_plantes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/photogrammetrie_openCV.py" beforeDir="false" afterPath="$PROJECT_DIR$/photogrammetrie_openCV.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/position_bac.py" beforeDir="false" afterPath="$PROJECT_DIR$/position_bac.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1
-}]]></component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;aloeb-gh&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/aloeb-gh/Photogrammetrie_openCV_Mobidiv.git&quot;,
+    &quot;accountId&quot;: &quot;4ac5c150-e84d-469b-8e52-d8ac7eb78651&quot;
+  }
+}</component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
   <component name="ProjectId" id="2bwzzIxhewwVxgNks0vbsULq3a1" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.photogrammetrie_openCV.executor&quot;: &quot;Run&quot;,
+    &quot;Python.script_stereo_martin.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/loeb/Documents/PycharmProjects/Photogrammetrie_Metashape_Mobidiv&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="photogrammetrie_openCV" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="stereo_imagerie" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/photogrammetrie_openCV.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.photogrammetrie_openCV" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-5a2391486177-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.13763.11" />
+        <option value="bundled-python-sdk-5b207ade9991-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.17890.14" />
       </set>
     </attachedChunks>
   </component>
@@ -38,6 +116,294 @@
       <option name="presentableId" value="Default" />
       <updated>1707141189757</updated>
     </task>
+    <task id="LOCAL-00001" summary="rename folder &amp; path&#10;+ fichiers calibration">
+      <option name="closed" value="true" />
+      <created>1708076897709</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1708076897709</updated>
+    </task>
+    <task id="LOCAL-00002" summary="update StereoSGBM">
+      <option name="closed" value="true" />
+      <created>1708508994998</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1708508994998</updated>
+    </task>
+    <task id="LOCAL-00003" summary="update StereoSGBM">
+      <option name="closed" value="true" />
+      <created>1708509098589</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1708509098589</updated>
+    </task>
+    <task id="LOCAL-00004" summary="update StereoSGBM">
+      <option name="closed" value="true" />
+      <created>1708509141580</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1708509141580</updated>
+    </task>
+    <task id="LOCAL-00005" summary="def raccourcir image">
+      <option name="closed" value="true" />
+      <created>1709051142422</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1709051142422</updated>
+    </task>
+    <task id="LOCAL-00006" summary="update path">
+      <option name="closed" value="true" />
+      <created>1709131605937</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1709131605937</updated>
+    </task>
+    <task id="LOCAL-00007" summary="reconnaissance bords bac par seil de gris, (efficace pour les premiers stades)&#10;+ def raccourcir image">
+      <option name="closed" value="true" />
+      <created>1709743327703</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1709743327703</updated>
+    </task>
+    <task id="LOCAL-00008" summary="update reconnaissance bords bac (update des seuils)">
+      <option name="closed" value="true" />
+      <created>1709911574628</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1709911574628</updated>
+    </task>
+    <task id="LOCAL-00009" summary="update reconnaissance bords bac fonctionne pour tout stade&#10;&#10;reorganisation du code&#10;fonctions">
+      <option name="closed" value="true" />
+      <created>1710433709325</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1710433709325</updated>
+    </task>
+    <task id="LOCAL-00010" summary="reorganisation du code&#10;suppression du capteur lors de la connaissance des bords du bac">
+      <option name="closed" value="true" />
+      <created>1710943993237</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1710943993237</updated>
+    </task>
+    <task id="LOCAL-00011" summary="boucle session et uplot + export&#10;+ update suppr capteur">
+      <option name="closed" value="true" />
+      <created>1711033588325</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1711033588325</updated>
+    </task>
+    <task id="LOCAL-00012" summary="boucle session et uplot + export&#10;+ update suppr capteur">
+      <option name="closed" value="true" />
+      <created>1711034094563</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1711034094563</updated>
+    </task>
+    <task id="LOCAL-00013" summary="def carte_hauteur">
+      <option name="closed" value="true" />
+      <created>1711124728254</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1711124728254</updated>
+    </task>
+    <task id="LOCAL-00014" summary="update (merge problem)">
+      <option name="closed" value="true" />
+      <created>1711355399631</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1711355399631</updated>
+    </task>
+    <task id="LOCAL-00015" summary="def carte hauteur">
+      <option name="closed" value="true" />
+      <created>1711355641886</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1711355641886</updated>
+    </task>
+    <task id="LOCAL-00016" summary="def filtre_points_aberrants et hauteur locale">
+      <option name="closed" value="true" />
+      <created>1712155308245</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1712155308245</updated>
+    </task>
+    <task id="LOCAL-00017" summary="def filtre_points_aberrants et hauteur_locale">
+      <option name="closed" value="true" />
+      <created>1712568288648</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1712568288648</updated>
+    </task>
+    <task id="LOCAL-00018" summary="export hauteurs locales en csv + update hauteur_locale &amp; update bord_bac">
+      <option name="closed" value="true" />
+      <created>1712734547801</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1712734547801</updated>
+    </task>
+    <task id="LOCAL-00019" summary="update export csv + update hauteur_locale (n_zones)">
+      <option name="closed" value="true" />
+      <created>1713361263203</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1713361263203</updated>
+    </task>
+    <task id="LOCAL-00020" summary="update export csv">
+      <option name="closed" value="true" />
+      <created>1713362993475</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1713362993475</updated>
+    </task>
+    <task id="LOCAL-00021" summary="update export csv">
+      <option name="closed" value="true" />
+      <created>1713363885278</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1713363885278</updated>
+    </task>
+    <task id="LOCAL-00022" summary="update bord_bac et contour bac, ajout de lignes verticales et horizontales comblant les vides dans les rebords du bac">
+      <option name="closed" value="true" />
+      <created>1714479532466</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1714479532466</updated>
+    </task>
+    <task id="LOCAL-00023" summary="rename">
+      <option name="closed" value="true" />
+      <created>1714650624947</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1714650624947</updated>
+    </task>
+    <task id="LOCAL-00024" summary="update hauteur_locale">
+      <option name="closed" value="true" />
+      <created>1714749966668</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1714749966668</updated>
+    </task>
+    <task id="LOCAL-00025" summary="update hauteur_locale (ne prend pas en compte les zones dont la hauteur est trop basse) + stats hauteurs locales">
+      <option name="closed" value="true" />
+      <created>1715873723341</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1715873723341</updated>
+    </task>
+    <task id="LOCAL-00026" summary="update carte_profondeur (blockSize = 10, diminue le bruit dans la carte de profondeur)">
+      <option name="closed" value="true" />
+      <created>1718789176050</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1718789176051</updated>
+    </task>
+    <task id="LOCAL-00027" summary="sructure du pipeline : ajout de 3 scripts (carte_profondeur, position_bac, hauteurs_plantes) regroupants des fonctions associées au même usage&#10;script principal (photogrammetrie_openCV) : def main + suppression des fonctions déplacées dans les scripts secondaires">
+      <option name="closed" value="true" />
+      <created>1718875516736</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1718875516736</updated>
+    </task>
+    <task id="LOCAL-00028" summary="sorties : grille_hauteur (avec valeurs de hauteurs et numéro des zones), projection du contour du bac sur les images originales, csv contenant les hauteurs">
+      <option name="closed" value="true" />
+      <created>1718981528705</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1718981528705</updated>
+    </task>
+    <task id="LOCAL-00029" summary="entrée : grille_hauteur selection du dossier par l'utilisateur (dossier plot, session ou racine/année) + choix du nombre de zone + choix du seuil du filtre des petits objets">
+      <option name="closed" value="true" />
+      <created>1719216097191</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1719216097191</updated>
+    </task>
+    <task id="LOCAL-00030" summary="gestion des NaN dans sortie csv : toute les zones sont prisent en compte et pas de décalage &#10;+ update position bac + update nom des fichiers sortie">
+      <option name="closed" value="true" />
+      <created>1719233819537</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1719233819537</updated>
+    </task>
+    <task id="LOCAL-00031" summary="update hauteur min plante dans mat hauteur">
+      <option name="closed" value="true" />
+      <created>1719308473770</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1719308473770</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="def raccourcir image" />
+    <MESSAGE value="update path" />
+    <MESSAGE value="reconnaissance bords bac par seil de gris, (efficace pour les premiers stades)&#10;+ def raccourcir image" />
+    <MESSAGE value="update reconnaissance bords bac (update des seuils)" />
+    <MESSAGE value="update reconnaissance bords bac fonctionne pour tout stade&#10;&#10;reorganisation du code&#10;fonctions" />
+    <MESSAGE value="reorganisation du code&#10;suppression du capteur lors de la connaissance des bords du bac" />
+    <MESSAGE value="boucle session et uplot + export&#10;+ update suppr capteur" />
+    <MESSAGE value="def carte_hauteur" />
+    <MESSAGE value="update (merge problem)" />
+    <MESSAGE value="def carte hauteur" />
+    <MESSAGE value="def filtre_points_aberrants et hauteur locale" />
+    <MESSAGE value="def filtre_points_aberrants et hauteur_locale" />
+    <MESSAGE value="export hauteurs locales en csv + update hauteur_locale &amp; update bord_bac" />
+    <MESSAGE value="update export csv + update hauteur_locale (n_zones)" />
+    <MESSAGE value="update export csv" />
+    <MESSAGE value="update bord_bac et contour bac, ajout de lignes verticales et horizontales comblant les vides dans les rebords du bac" />
+    <MESSAGE value="rename" />
+    <MESSAGE value="update hauteur_locale" />
+    <MESSAGE value="update hauteur_locale (ne prend pas en compte les zones dont la hauteur est trop basse) + stats hauteurs locales" />
+    <MESSAGE value="update carte_profondeur (blockSize = 10, diminue le bruit dans la carte de profondeur)" />
+    <MESSAGE value="sructure du pipeline : ajout de 3 scripts (carte_profondeur, position_bac, hauteurs_plantes) regroupants des fonctions associées au même usage&#10;script principal (photogrammetrie_openCV) : def main + suppression des fonctions déplacées dans les scripts secondaires" />
+    <MESSAGE value="sorties : grille_hauteur (avec valeurs de hauteurs et numéro des zones), projection du contour du bac sur les images originales, csv contenant les hauteurs" />
+    <MESSAGE value="entrée : grille_hauteur selection du dossier par l'utilisateur (dossier plot, session ou racine/année) + choix du nombre de zone + choix du seuil du filtre des petits objets" />
+    <MESSAGE value="gestion des NaN dans sortie csv : toute les zones sont prisent en compte et pas de décalage &#10;+ update position bac + update nom des fichiers sortie" />
+    <MESSAGE value="update hauteur min plante dans mat hauteur" />
+    <option name="LAST_COMMIT_MESSAGE" value="update hauteur min plante dans mat hauteur" />
   </component>
 </project>
