@@ -1,4 +1,4 @@
-# Pipeline d’analyse d’image parphotogrammétrie
+# Pipeline d’analyse d’image par photogrammétrie
 
 ## Description
 Ce projet à pour objetctif de mesurer les traits architecturaux de couverts végétaux dans un contexte d'étude des mélanges variétaux de blé.
