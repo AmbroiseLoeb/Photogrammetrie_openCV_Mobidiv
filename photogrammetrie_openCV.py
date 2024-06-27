@@ -89,12 +89,14 @@ def traiter_dossier_plot(plot_path, session_name):
             # Calcul des hauteurs locales
             carte_hauteur, profondeur_sol = hauteurs_plantes.carte_hauteur_absolue(mat_filtree, n_zones)  # Carte de hauteur relative au sol
             liste_hauteurs, grille_h, figure_h = hauteurs_plantes.hauteur_par_zone(carte_hauteur, n_zones)
+            # liste_hauteurs, figure_sommet = hauteurs_plantes.hauteur_par_sommet(carte_hauteur)  # Optionnel
             print(liste_hauteurs)
 
             # Enregistrement des fichiers
             sauvegarder_image(image_left_bac, plot_path, file.replace('RGB', 'bac'))  # Contours du bac détectés sur l'image de gauche
             sauvegarder_image(image_left_bac, plot_path, file.replace('camera_1', 'camera_2').replace('RGB', 'bac'))  # Contours du bac détectés sur l'image de droite
             sauvegarder_image(figure_h, plot_path, f"grille_hauteur_{os.path.basename(os.path.normpath(plot_path))}_{n_zones}z.jpg")  # Représentation graphique des hauteurs locales dans le bac
+            # sauvegarder_image(figure_sommet, plot_path, f"sommets_hauteur_{os.path.basename(os.path.normpath(plot_path))}_{n_zones}z.jpg")  # Représentation graphique des hauteurs par sommet (Optionnel)
 
             # Export de la liste des hauteurs en csv
             with open(os.path.basename(csv_path).replace(".csv", "_temporary.csv"), 'a', newline='') as csvfile:
