@@ -1,5 +1,7 @@
 # Pipeline d’analyse d’image par photogrammétrie
 
+<br>
+
 ## Description
 Ce projet à pour objetctif de mesurer les traits architecturaux de couverts végétaux dans un contexte d'étude des mélanges variétaux de blé.
 Différents génotypes sont cultivés dans des bacs séparés, en culture pure ou en mélange.
@@ -7,6 +9,8 @@ Plusieurs dispositifs d'acqisition d'image, manuel ou automatique, permettent un
 
 Le projet comporte deux méthodes, s'adaptant chacune à un dispositif d'aquisition.
 Ici, on se propose de traiter les images par photogrammétrie à l'aide notamment de la librairie Python openCV.
+
+<br>
 
 ## Installation
 
@@ -31,7 +35,7 @@ Ici, on se propose de traiter les images par photogrammétrie à l'aide notammen
     pip install -r requirements.txt
     ```
 
-
+<br>
 
 ## Utilisation
 **Lancer le pipeline :**
@@ -69,7 +73,7 @@ Il est souvent nécessaire d'augmenter cette valeur (ex : 2000, 5000) lorsque le
 - représentation graphique des hauteur de chaque zone (dans le dossier *plot*).
 - représentation graphique des contours du bac détecté sur chaque image (dans le dossier *plot*).
 
-
+<br>
 
 ## Ressources utiles
 
