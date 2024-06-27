@@ -67,15 +67,30 @@ Il est nécessaire de filtrer ces derniers par leur taille.
 Par défault, la valeur du seuil est fixé à 300 (pixels).
 Il est souvent nécessaire d'augmenter cette valeur (ex : 2000, 5000) lorsque les plantes occupent peu de surface (notamment lors des premiers stades de croissance).
 
+<br>
+
+## Informations pratiques
+
+
 **Outputs :**
 
 - fichier .csv comprenant la hauteur de chaque zone (dans le dossier sélectionné).
 - représentation graphique des hauteur de chaque zone (dans le dossier *plot*).
 - représentation graphique des contours du bac détecté sur chaque image (dans le dossier *plot*).
 
+
+**Fonctions, variables et paramètres clés :**
+
+- hauteur_par_zone : Fonction python permettant de calculer les hauteurs locales par zone.
+    - max_local et max_glob : Variables correspondant aux maximaux locaux et globaux. Permettent de filtrer les hauteur locales les plus faibles (if max_local > max_glob/5)
+    - 
+- StereoSGBM : Fonction openCV permetant de calculer la disparité entre deux images.
+    - blockSize : Taille du block de pixel utilisé lors du calcul de disparité. Réduire ce paramètre augmente la résolution, mais augmente également le bruit.
+
+
 <br>
 
-## Ressources utiles
+## Ressources
 
 Suivi du projet : 
 https://aloeb.notion.site/Suivi-du-projet-482f379e883b4974b1b2b95aec96181d
