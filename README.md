@@ -92,8 +92,5 @@ Il est souvent nécessaire d'augmenter cette valeur (ex : 2000, 5000) lorsque le
 
 ## Ressources
 
-Suivi du projet : 
-https://aloeb.notion.site/Suivi-du-projet-482f379e883b4974b1b2b95aec96181d
-
 Projet Mobidiv :
 https://mobidiv.hub.inrae.fr/
